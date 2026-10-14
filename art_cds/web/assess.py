@@ -14,7 +14,7 @@ from ..knowledge.interactions import COMEDICATIONS
 from ..knowledge.regimens import REGIMENS
 from ..models.patient import ARV_CLASSES, STOP_REASONS
 from ..visuals import timeline
-from .forms import SUBTYPES, TROPISMS, parse_patient
+from .forms import SUBTYPES, TROPISMS, VIRUS_TYPES, parse_patient
 
 bp = Blueprint("assess", __name__)
 
@@ -32,6 +32,7 @@ def _form_context(values: MultiDict, errors=None):
         "cases": CASES,
         "subtypes": SUBTYPES,
         "tropisms": TROPISMS,
+        "virus_types": VIRUS_TYPES,
         "regimens": REGIMENS,
         "stop_reasons": STOP_REASONS,
     }

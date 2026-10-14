@@ -59,7 +59,7 @@ def recommend(patient: PatientProfile) -> Report:
     patient = derive(patient)
     resistance: Optional[ResistanceReport] = None
     tests = patient.genotype_history
-    if tests:
+    if tests and patient.virus_type != "HIV-2":  # HIV-1 algorithms do not apply to HIV-2
         resistance = interpret_history(tests, patient.minority_threshold, patient.use_hivdb)
     ctx = rules.RuleContext(patient, resistance, classify(patient.vl_history, patient.art_history))
 

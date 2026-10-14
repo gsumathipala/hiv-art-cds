@@ -34,6 +34,8 @@
   <fieldset>
     <legend>Treatment situation</legend>
     <div class="fields">
+      <label class="f">Virus {{ error('virus_type') }}
+        <select name="virus_type">{% for t in virus_types %}<option value="{{ t }}" {{ sel('virus_type', t, 'HIV-1') }}>{{ t }}{{ ' dual infection' if '/' in t }}</option>{% endfor %}</select></label>
       <label class="f">Scenario {{ error('status') }}
         <select name="status" id="status">
           <option value="naive" {{ sel('status','naive','naive') }}>ART-naive — first-line</option>

@@ -20,6 +20,7 @@ _LINE = re.compile(r"^\s*(\d{4}-\d{2}(?:-\d{2})?)[\s,;:]+(<|≤|&lt;)?\s*([\d,.]
 MAX_GENOTYPES = 5
 SUBTYPES = ("", "A1", "A6", "B", "C", "D", "F", "G", "CRF01_AE", "CRF02_AG", "other")
 TROPISMS = ("unknown", "R5", "X4", "dual/mixed")
+VIRUS_TYPES = ("HIV-1", "HIV-2", "HIV-1/HIV-2")
 
 Errors = Dict[str, str]
 
@@ -203,6 +204,7 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
         pregnancy=pregnancy,
         breastfeeding=_bool(form, "breastfeeding") and sex == "female",
         status=status,
+        virus_type=_choice(form, "virus_type", VIRUS_TYPES + ("",), errors) or "HIV-1",
         failed_classes=failed,
         cab_prep_exposure=_bool(form, "cab_prep_exposure"),
         rapid_start=_bool(form, "rapid_start") and status is TreatmentStatus.NAIVE,

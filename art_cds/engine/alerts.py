@@ -71,6 +71,14 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
         add("warning", "Previous long-acting cabotegravir PrEP: request an integrase genotype; HIV RNA testing may be "
             "needed to diagnose infection, and serology can be delayed.", guideline(BHIVA_ART))
 
+    if p.virus_type != "HIV-1":
+        from .rules.hiv2 import EXPERT, MVC_HIV2
+        add("critical", f"{p.virus_type}: manage with an HIV-2 expert. NNRTIs are inactive against HIV-2; maraviroc and "
+            "enfuvirtide are not reliable options. HIV-2 needs an HIV-2-specific viral load assay (HIV-1 assays do not "
+            "detect it), and HIV-1 resistance algorithms do not apply to HIV-2 genotypes"
+            + (" — the HIV-1 genotype was still scored for the HIV-1 component." if p.virus_type == "HIV-1/HIV-2"
+               else " — resistance scoring has been switched off."), EXPERT, MVC_HIV2)
+
     if p.medicines_text:
         from ..knowledge.medicines import reconcile
         unknown = [r.text for r in reconcile(p.medicines_text) if not r.key]

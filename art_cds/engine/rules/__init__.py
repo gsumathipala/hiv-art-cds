@@ -1,6 +1,6 @@
 """Rule modules. Importing this package registers them, in this order."""
 from . import (  # noqa: F401  (imported for registration)
-    hla, hepatitis_b, organ, indication, pregnancy, history, resistance, interactions, tolerability, preferences,
+    hla, hepatitis_b, hiv2, organ, indication, pregnancy, history, resistance, interactions, tolerability, preferences,
 )
 from .base import CLAIMS, LABELS, REGISTRY, RuleContext
 

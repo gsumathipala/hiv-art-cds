@@ -98,6 +98,7 @@
       <h3>Patient</h3>
       <dl>
         <dt>Scenario</dt><dd>{{ p.status.label }}</dd>
+        {% if p.virus_type != 'HIV-1' %}<dt>Virus</dt><dd>{{ p.virus_type }}</dd>{% endif %}
         <dt>Age / sex</dt><dd>{{ p.age }} · {{ p.sex }}{% if p.weight_kg %} · {{ p.weight_kg|round(1) }} kg{% endif %}</dd>
         {% if p.sex == 'female' %}<dt>Pregnancy</dt><dd>{{ p.pregnancy.label }}{% if p.breastfeeding %} · breastfeeding{% endif %}</dd>{% endif %}
         <dt>HIV RNA</dt><dd>{{ '{:,}'.format(p.viral_load) if p.viral_load is not none else 'unknown' }}</dd>

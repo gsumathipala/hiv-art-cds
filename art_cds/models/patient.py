@@ -108,6 +108,7 @@ class PatientProfile:
     breastfeeding: bool = False
 
     status: TreatmentStatus = TreatmentStatus.NAIVE
+    virus_type: str = "HIV-1"  # HIV-1 | HIV-2 | HIV-1/HIV-2
     failed_classes: FrozenSet[str] = frozenset()  # classes in a regimen that failed
     cab_prep_exposure: bool = False  # long-acting cabotegravir PrEP before diagnosis
     rapid_start: bool = False  # start before baseline results return
