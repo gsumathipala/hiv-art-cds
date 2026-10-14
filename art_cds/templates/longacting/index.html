@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ref_link with context %}
+{% block title %}Long-acting planner{% endblock %}
+{% block content %}
+<h1>Long-acting injectable planner</h1>
+<p class="muted">Schedules, the ±7-day window, missed injections and oral bridging for cabotegravir + rilpivirine
+  (Vocabria + Rekambys), and the lenacapavir (Sunlenca) schedule — all from the UK SmPC §4.2.</p>
+<div class="grid two">
+  <form class="card" method="get">
+    <h3>Schedule</h3>
+    <div class="fields">
+      <label class="f">Medicine<select name="drug"><option value="cab_rpv" {{ 'selected' if drug == 'cab_rpv' }}>Cabotegravir + rilpivirine</option>
+        <option value="len" {{ 'selected' if drug == 'len' }}>Lenacapavir (Sunlenca)</option></select></label>
+      <label class="f">First injection (CAB+RPV) / Day 1 (lenacapavir)<input type="date" name="start" value="{{ a.get('start', '') }}"></label>
+      <label class="f">CAB+RPV interval<select name="interval"><option value="q2m" {{ 'selected' if a.get('interval', 'q2m') == 'q2m' }}>Every 2 months</option>
+        <option value="q1m" {{ 'selected' if a.get('interval') == 'q1m' }}>Monthly</option></select></label>
+      <label class="f">Visits to show<input type="number" name="visits" min="2" max="24" value="{{ a.get('visits', 8) }}"></label>
+    </div>
+    <div class="checks"><label><input type="checkbox" name="lead_in" {{ 'checked' if a.get('lead_in') == 'on' }}> Optional oral lead-in (≥ 28 days)</label></div>
+    <button class="btn">Show schedule</button>
+    {% if visits %}
+    <table class="data" style="margin-top:12px">
+      <tr><th>#</th><th>Target date</th><th>Window</th><th>Dose</th></tr>
+      {% for v in visits %}<tr><td>{{ v.number or '' }}</td><td><b>{{ v.target.strftime('%a %d %b %Y') }}</b><br><span class="small muted">{{ v.label }}</span></td>
+        <td class="small">{% if v.window[0] != v.window[1] %}{{ v.window[0].strftime('%d %b') }} – {{ v.window[1].strftime('%d %b %Y') }}{% else %}—{% endif %}</td>
+        <td class="small">{{ v.doses }}</td></tr>{% endfor %}
+    </table>
+    <p><a class="btn ghost" href="{{ url_for('longacting.calendar', **a) }}">Download calendar (.ics)</a></p>
+    <p class="small">{% if drug == 'len' %}{{ ref_link(la.LEN_SCHEDULE) }}{% else %}{{ ref_link(la.SCHEDULE_Q2M if a.get('interval', 'q2m') == 'q2m' else la.SCHEDULE_Q1M) }} {{ ref_link(la.LEAD_IN) }}{% endif %}
+      {{ ref_link(la.LA_MONITORING) }} — HIV RNA every 2 months for the first 6–12 months.</p>
+    {% endif %}
+  </form>
+
+  <div class="stack">
+    <form class="card" method="get">
+      <h3>Missed or delayed CAB + RPV injection</h3>
+      <input type="hidden" name="drug" value="cab_rpv">
+      <div class="fields">
+        <label class="f">Last injection<input type="date" name="last" value="{{ a.get('last', '') }}"></label>
+        <label class="f">Date of next possible injection<input type="date" name="on" value="{{ a.get('on', today.isoformat()) }}"></label>
+        <label class="f">Interval<select name="interval"><option value="q2m" {{ 'selected' if a.get('interval', 'q2m') == 'q2m' }}>Every 2 months</option>
+          <option value="q1m" {{ 'selected' if a.get('interval') == 'q1m' }}>Monthly</option></select></label>
+        <label class="f">Missed visit (2-monthly)<select name="missed_visit"><option value="2" {{ 'selected' if a.get('missed_visit') == '2' }}>Injection 2</option>
+          <option value="3" {{ 'selected' if a.get('missed_visit', '3') == '3' }}>Injection 3 or later</option></select></label>
+      </div>
+      <button class="btn">Advise</button>
+      {% if missed %}<div class="dose" style="margin-top:10px"><b>{{ missed[0] }}</b> {{ ref_link(missed[1]) }}</div>
+        <p class="small"><b>Planned absence:</b> {{ bridge[0] }} {{ ref_link(bridge[1]) }}</p>
+        <p class="small">If injections stop, start a fully suppressive oral regimen within 1 month (monthly dosing) or 2
+          months (2-monthly) of the last injection — the long pharmacokinetic tail risks resistance. {{ ref_link(la.TAIL) }}</p>{% endif %}
+      <p class="small muted">Lenacapavir: if more than 28 weeks have passed since the last injection, restart from Day 1. {{ ref_link(la.LEN_MISSED) }}</p>
+    </form>
+
+    <form class="card" method="get">
+      <h3>Risk of virological failure on CAB + RPV</h3>
+      <input type="hidden" name="risk" value="on">
+      <div class="fields">
+        <label class="f">RT mutations (all genotypes, incl. proviral)<input type="text" name="rt" value="{{ a.get('rt', '') }}"></label>
+        <label class="f">Subtype<select name="subtype">{% for s in ['', 'A1', 'A6', 'B', 'C', 'D', 'CRF01_AE', 'CRF02_AG', 'other'] %}<option value="{{ s }}" {{ 'selected' if a.get('subtype') == s }}>{{ s or 'Unknown' }}</option>{% endfor %}</select></label>
+        <label class="f">Height (cm)<input type="number" name="height" value="{{ a.get('height', '') }}"></label>
+        <label class="f">Weight (kg)<input type="number" name="weight" value="{{ a.get('weight', '') }}"></label>
+      </div>
+      <button class="btn">Assess</button>
+      {% if risk %}
+        <p style="margin-top:10px"><span class="badge {{ 'b-exclude' if risk.high else 'b-caution' if risk.factors else 'b-preferred' }}">{{ risk.factors|length }} of 3 risk factors</span>
+          {{ risk.factors|join(', ') }}{% if risk.unknown %} · unknown: {{ risk.unknown|join(', ') }}{% endif %}</p>
+        <p class="small">Two or more of archived rilpivirine RAMs, subtype A6/A1 and BMI ≥ 30 kg/m² raise the risk of
+          failure, more so with 2-monthly dosing. {{ ref_link(la.RISK) }} {{ ref_link(la.RPV_RAMS_REF) }}</p>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

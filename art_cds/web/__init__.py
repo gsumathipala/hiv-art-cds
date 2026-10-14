@@ -17,11 +17,13 @@ def register(app: Flask) -> None:
     from .assess import bp as assess_bp
     from .calculators import bp as calculators_bp
     from .learn import bp as learn_bp
+    from .longacting import bp as longacting_bp
 
     app.register_blueprint(assess_bp)
     app.register_blueprint(learn_bp, url_prefix="/learn")
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(calculators_bp, url_prefix="/calculators")
+    app.register_blueprint(longacting_bp, url_prefix="/long-acting")
 
     @app.context_processor
     def globals_():

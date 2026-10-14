@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ...knowledge.guidelines import NICE_TA757
 from ...models import Severity, TreatmentStatus, guideline
+from ... import longacting
 from .base import bhiva, claim, finding, rule
 
 DTG_3TC_VL = bhiva("bhiva_art", "5", r"Baseline viral load <500,000 copies/mL")
@@ -80,6 +81,22 @@ def indication(regimen, ctx):
         if p.viral_load is not None and p.viral_load >= 50:
             out.append(finding("indication", Severity.EXCLUDE,
                                "Licensed only for people suppressed below 50 copies/mL.", refs=(CAB_RPV,)))
+        bmi = (p.weight_kg / (p.height_cm / 100) ** 2) if p.weight_kg and p.height_cm else None
+        rt = ctx.resistance.mutations.get("RT", []) if ctx.resistance else []
+        risk = longacting.failure_risk(rt, p.subtype or (ctx.resistance.subtype.split()[0]
+                                                           if ctx.resistance and ctx.resistance.subtype else ""), bmi)
+        if risk.high:
+            out.append(finding("indication", Severity.CAUTION,
+                               "Two or more baseline risk factors for virological failure: " + ", ".join(risk.factors)
+                               + ". Failure is more frequent with 2-monthly than monthly dosing.", -25,
+                               refs=(longacting.RISK, longacting.RISK_Q2M),
+                               dose_change="If proceeding, prefer monthly dosing (Vocabria 400 mg + Rekambys 600 mg)"))
+        elif risk.factors:
+            out.append(finding("indication", Severity.INFO, "One baseline risk factor for failure: "
+                               + risk.factors[0] + " (two or more raise the risk).", refs=(longacting.RISK,)))
+        if risk.unknown:
+            out.append(finding("indication", Severity.INFO, "Unknown failure-risk factors: " + ", ".join(risk.unknown)
+                               + " — record them before switching (enter height for BMI).", refs=(longacting.RISK,)))
         out.append(finding("indication", Severity.INFO,
                            "BHIVA criteria: on ART for at least 3–6 months, motivated for injections, able to attend "
                            "2-monthly, and not the combination of BMI > 30 kg/m² with HIV-1 subtype A6.",
