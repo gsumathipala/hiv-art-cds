@@ -22,6 +22,9 @@ GUIDELINE_DOCS = {
                   "(2025 interim update)"),
     "bhiva_pregnancy": ("BHIVA pregnancy 2025",
                         "BHIVA guidelines on the management of HIV in pregnancy and the postpartum period (2025)"),
+    "bhiva_tb": ("BHIVA TB 2023",
+                 "BHIVA guidelines for the management of tuberculosis in adults living with HIV 2018 (2023 interim "
+                 "update)"),
 }
 
 SMPC_CLAIMS: List[Tuple[str, str, Tuple[str, ...]]] = []

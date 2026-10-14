@@ -20,11 +20,16 @@ DOCUMENTS = {
                  "BHIVA-guidelines-on-antiretroviral-treatment-for-adults-living-with-HIV-1-2025-interim-update.pdf",
     "bhiva_pregnancy": "https://bhiva.org/wp-content/uploads/2025/06/"
                        "BHIVA-guidelines-on-the-management-of-HIV-in-pregnancy-and-the-postpartum-period.pdf",
+    "bhiva_tb": "https://bhiva.org/wp-content/uploads/2024/10/BHIVA-TB-guidelines.pdf",
 }
 
 
 def main() -> int:
+    import logging
+
     from pypdf import PdfReader
+
+    logging.getLogger("pypdf").setLevel(logging.ERROR)
 
     OUT.mkdir(parents=True, exist_ok=True)
     for key, url in DOCUMENTS.items():

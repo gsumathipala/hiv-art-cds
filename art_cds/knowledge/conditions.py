@@ -9,5 +9,6 @@ COMORBIDITIES = {
     "dyslipidaemia": "Dyslipidaemia",
     "diabetes": "Diabetes mellitus",
     "active_tb": "Active tuberculosis",
+    "cns_tb": "CNS tuberculosis (including TB meningitis)",
     "crypto_meningitis": "Cryptococcal meningitis (current)",
 }

@@ -121,6 +121,11 @@ class PatientProfile:
     hbsag: LabResult = LabResult.UNKNOWN
     hla_b5701: LabResult = LabResult.UNKNOWN
     hcv: bool = False
+    anti_hbc: LabResult = LabResult.UNKNOWN
+    anti_hbs: LabResult = LabResult.UNKNOWN
+    hbv_dna: Optional[float] = None  # IU/mL
+    crag: LabResult = LabResult.UNKNOWN  # serum cryptococcal antigen
+    tb_start: str = ""  # date TB treatment started
 
     genotype_available: bool = False
     rt_mutations: str = ""  # shorthand for a single current genotype

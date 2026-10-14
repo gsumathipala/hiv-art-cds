@@ -78,11 +78,15 @@ CASES: Tuple[Case, ...] = (
         "HIV RNA 250,000 copies/mL. Resistance test pending.",
         {"age": "35", "sex": "male", "weight_kg": "58", "status": "naive", "viral_load": "250000", "cd4": "85",
          "crcl": "105", "hbsag": "negative", "hla_b5701": "negative", "genotype": "pending",
-         "comorbidities": ("active_tb",), "comedications": ("rifampicin",)},
-        ("Rifampicin is contraindicated with bictegravir, rilpivirine, doravirine, cabotegravir and boosted "
-         "PIs (SmPC §4.3).",
-         "Dolutegravir is usable at 50 mg twice daily (Tivicay SmPC §4.2), as is raltegravir 800 mg twice daily.",
-         "With CD4 < 50, start ART within 2 weeks of TB treatment; otherwise by 8 weeks. Watch for IRIS."),
+         "comorbidities": ("active_tb",), "comedications": ("rifampicin",), "crag": "negative",
+         "tb_start": "2026-10-05"},
+        ("Rifampicin is contraindicated with bictegravir, rilpivirine, doravirine, cabotegravir and boosted PIs "
+         "(SmPC §4.3), and BHIVA advises against cobicistat with any rifamycin.",
+         "BHIVA's TB guideline puts efavirenz with tenofovir disoproxil/emtricitabine first line on rifampicin, with "
+         "dolutegravir (50 mg twice daily) or raltegravir as alternatives, and advises against TAF- or "
+         "bictegravir-containing combinations and two-drug regimens until outcome data exist.",
+         "ART within 2 weeks of TB treatment if CD4 < 50, otherwise within 4 weeks of the TB diagnosis; CNS TB is the "
+         "exception and can be delayed for 8 weeks. Watch for paradoxical TB-IRIS."),
         ("TB", "interactions"),
     ),
     Case(

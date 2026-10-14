@@ -134,6 +134,14 @@
         <select name="hbsag">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('hbsag', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
       <label class="f">HLA-B*57:01
         <select name="hla_b5701">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('hla_b5701', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
+      <label class="f">Anti-HBc
+        <select name="anti_hbc">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('anti_hbc', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
+      <label class="f">Anti-HBs <span class="hint">immune if ≥ 10 IU/L</span>
+        <select name="anti_hbs">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('anti_hbs', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
+      <label class="f">HBV DNA (IU/mL) {{ error('hbv_dna') }}<input type="number" name="hbv_dna" value="{{ v('hbv_dna') }}"></label>
+      <label class="f">Serum cryptococcal antigen
+        <select name="crag">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('crag', val, 'unknown') }}>{{ 'Not done' if val == 'unknown' else val|capitalize }}</option>{% endfor %}</select></label>
+      <label class="f">TB treatment started<input type="date" name="tb_start" value="{{ v('tb_start') }}"></label>
     </div>
     <details {{ 'open' if v('creatinine_umol') or v('bilirubin_umol') or v('qrisk3') or v('frax_mof') }}>
       <summary><b>Calculators</b> — creatinine clearance, eGFR, Child-Pugh, QRISK3, FRAX
