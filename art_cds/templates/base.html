@@ -25,6 +25,7 @@
         <a href="{{ url_for('learn.cases') }}" class="{{ 'active' if ep == 'learn.cases' }}">Cases</a>
         <a href="{{ url_for('calculators.index') }}" class="{{ 'active' if ep.startswith('calculators') }}">Calculators</a>
         <a href="{{ url_for('longacting.index') }}" class="{{ 'active' if ep.startswith('longacting') }}">Long-acting</a>
+        <a href="{{ url_for('perinatal.index') }}" class="{{ 'active' if ep.startswith('perinatal') }}">Perinatal</a>
         <a href="{{ url_for('learn.about') }}" class="{{ 'active' if ep == 'learn.about' }}">Sources</a>
         <a href="{{ url_for('assess.form') }}" class="cta">Assess a patient</a>
       </nav>

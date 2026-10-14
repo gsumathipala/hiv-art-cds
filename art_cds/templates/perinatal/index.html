@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ref_link with context %}
+{% block title %}Infant prophylaxis{% endblock %}
+{% block content %}
+<h1>Perinatal planner — infant prophylaxis</h1>
+<p class="muted">Risk category and post-natal prophylaxis (PNP) for the infant, and whether intrapartum intravenous
+  zidovudine is indicated, from the BHIVA pregnancy and postpartum guidelines (2025) §11.1 and §8.7.</p>
+<div class="grid two">
+  <form class="card" method="get"><input type="hidden" name="go" value="1">
+    <h3>Parent at delivery</h3>
+    <div class="fields">
+      <label class="f">Weeks of ART before delivery<input type="number" step="0.5" name="art_weeks" value="{{ a.get('art_weeks', '') }}"></label>
+      <label class="f">Viral load at delivery (copies/mL)<span class="hint">leave blank if unknown</span>
+        <input type="number" name="delivery_vl" value="{{ a.get('delivery_vl', '') }}"></label>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" name="engagement" {{ 'checked' if a.get('engagement') == 'on' }}> Good engagement with maternity, antenatal and HIV services</label>
+      <label><input type="checkbox" name="vl_6_weeks" {{ 'checked' if a.get('vl_6_weeks') == 'on' }}> At least one viral load in the 6 weeks before delivery</label>
+      <label><input type="checkbox" name="vl_10_weeks" {{ 'checked' if a.get('vl_10_weeks') == 'on' }}> All viral loads &lt; 50 copies/mL in the 10 weeks before delivery</label>
+      <label><input type="checkbox" name="breastfeeding" {{ 'checked' if a.get('breastfeeding') == 'on' }}> Breast/chest-feeding</label>
+      <label><input type="checkbox" name="nnrti_resistance" {{ 'checked' if a.get('nnrti_resistance') == 'on' }}> Known maternal NNRTI resistance</label>
+      <label><input type="checkbox" name="untreated" {{ 'checked' if a.get('untreated') == 'on' }}> Untreated, presenting in labour with unknown viral load</label>
+    </div>
+    <button class="btn">Assess</button>
+  </form>
+  <div class="stack">
+    {% if plan %}
+    <div class="card">
+      <div class="row"><h3 style="margin:0">Infant PNP</h3>
+        <span class="badge {{ 'b-exclude' if plan.risk == 'high' else 'b-preferred' }}">{{ plan.risk }} risk</span></div>
+      <p style="font-size:1.1rem;margin-top:8px"><b>{{ plan.regimen }}</b><br><span class="muted">{{ plan.duration }}</span></p>
+      {% if plan.criteria_failed %}<div class="group-title">Low-risk criteria not met</div>
+        <ul class="small">{% for c in plan.criteria_failed %}<li>{{ c }}</li>{% endfor %}</ul>{% endif %}
+      {% if plan.criteria_met %}<details class="small"><summary>{{ plan.criteria_met|length }} criteria met</summary>
+        <ul>{% for c in plan.criteria_met %}<li>{{ c }}</li>{% endfor %}</ul></details>{% endif %}
+      <ul class="small" style="margin-top:8px">{% for n in plan.notes %}<li>{{ n }}</li>{% endfor %}</ul>
+      <p class="small">{% for r in plan.refs %}{{ ref_link(r) }} {% endfor %}</p>
+    </div>
+    <div class="card">
+      <h3>Intrapartum</h3>
+      <p>{{ iv[0] }} {{ ref_link(iv[1]) }}</p>
+      <h3>Infant testing</h3>
+      <p class="small">{{ p.INFANT_TESTING }}</p>
+      {% if a.get('breastfeeding') == 'on' %}<p class="small">{{ p.MONITORING_BREASTFEEDING }}</p>{% endif %}
+    </div>
+    {% else %}
+    <div class="card"><h3>BHIVA §11.1 low-risk criteria</h3>
+      <p class="small">All of: ART started at least 10 weeks before delivery; good engagement with services; at least one
+        viral load in the 6 weeks before delivery; all viral loads &lt; 50 copies/mL in the 10 weeks before delivery.
+        A viral load of 50–200 copies/mL can be assessed individually, especially if a later one is &lt; 50.</p>
+      <p class="small">Low risk → 2 weeks of zidovudine. Otherwise combination PNP: zidovudine and lamivudine for
+        4 weeks with nevirapine for 2 weeks. Start within 4 hours of birth. Dose from Appendix 4 of the guideline.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
