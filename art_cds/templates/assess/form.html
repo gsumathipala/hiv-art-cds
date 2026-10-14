@@ -55,15 +55,42 @@
     <div class="fields">
       <label class="f">HIV-1 RNA (copies/mL) {{ error('viral_load') }}<input type="number" name="viral_load" min="0" value="{{ v('viral_load') }}"></label>
       <label class="f">CD4 count (cells/mm³) {{ error('cd4') }}<input type="number" name="cd4" min="0" value="{{ v('cd4') }}"></label>
-      <label class="f">Resistance test
+      <label class="f">Resistance testing
         <select name="genotype" id="genotype">
           <option value="pending" {{ sel('genotype','pending','pending') }}>Not available / pending</option>
           <option value="available" {{ sel('genotype','available') }}>Available</option></select></label>
+      <label class="f">HIV-1 subtype <span class="hint">from the lab report or sequence</span>
+        <select name="subtype">{% for st in subtypes %}<option value="{{ st }}" {{ sel('subtype', st, '') }}>{{ st or 'Unknown' }}</option>{% endfor %}</select></label>
+      <label class="f">Co-receptor tropism
+        <select name="tropism">{% for t in tropisms %}<option value="{{ t }}" {{ sel('tropism', t, 'unknown') }}>{{ t if t != 'unknown' else 'Not tested' }}</option>{% endfor %}</select></label>
     </div>
-    <div class="fields" data-show-if="genotype=available">
-      <label class="f">Reverse transcriptase mutations <span class="hint">e.g. M184V, K65R, K103N — leave blank if none</span><input type="text" name="rt_mutations" value="{{ v('rt_mutations') }}"></label>
-      <label class="f">Protease mutations <span class="hint">e.g. I50L, I84V</span><input type="text" name="pr_mutations" value="{{ v('pr_mutations') }}"></label>
-      <label class="f">Integrase mutations <span class="hint">e.g. G140S, Q148H</span><input type="text" name="in_mutations" value="{{ v('in_mutations') }}"></label>
+    <div data-show-if="genotype=available">
+      <p class="small muted">Enter <b>every</b> resistance test the patient has had — resistance is cumulative and archived
+        mutations persist. Mutations as <code>M184V, K103N</code>; mixtures as <code>K103KN</code>; NGS frequencies as
+        <code>K103N:12%</code>. A FASTA pol sequence can be pasted instead (needs Stanford HIVdb).</p>
+      {% for i in range(5) %}
+      <div class="genotype-row card" data-genotype-row="{{ i }}" style="margin-bottom:10px;padding:12px">
+        <div class="fields">
+          <label class="f">Test {{ i + 1 }} date<input type="date" name="g{{ i }}_date" value="{{ v('g%d_date' % i) }}"></label>
+          <label class="f">Specimen {{ error('g%d_source' % i) }}
+            <select name="g{{ i }}_source"><option value="plasma" {{ sel('g%d_source' % i, 'plasma', 'plasma') }}>Plasma RNA</option>
+              <option value="proviral" {{ sel('g%d_source' % i, 'proviral') }}>Proviral DNA (archive)</option></select></label>
+          <label class="f">RT mutations<input type="text" name="g{{ i }}_rt" value="{{ v('g%d_rt' % i) }}"></label>
+          <label class="f">Protease mutations<input type="text" name="g{{ i }}_pr" value="{{ v('g%d_pr' % i) }}"></label>
+          <label class="f">Integrase mutations<input type="text" name="g{{ i }}_integrase" value="{{ v('g%d_integrase' % i) }}"></label>
+        </div>
+        <details {{ 'open' if v('g%d_sequence' % i) }}><summary class="small">Paste a FASTA sequence instead {{ error('g%d_sequence' % i) }}</summary>
+          <textarea name="g{{ i }}_sequence" rows="3" class="mono">{{ v('g%d_sequence' % i) }}</textarea></details>
+      </div>
+      {% endfor %}
+      <button type="button" class="btn ghost" id="add-genotype">+ Add another test</button>
+      <div class="fields" style="margin-top:12px">
+        <label class="f">NGS minority-variant threshold (%) {{ error('minority_threshold') }}
+          <span class="hint">variants below this are reported, not scored</span>
+          <input type="number" name="minority_threshold" min="1" max="50" step="1" value="{{ v('minority_threshold', '20') }}"></label>
+      </div>
+      <div class="checks"><label><input type="checkbox" name="use_hivdb" {{ chk('use_hivdb') }}>
+        Use Stanford HIVdb (sends the mutation list or sequence — no identifiers — to hivdb.stanford.edu)</label></div>
     </div>
   </fieldset>
 

@@ -6,8 +6,12 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 from ..knowledge.conditions import COMORBIDITIES
 from ..knowledge.interactions import COMEDICATIONS_BY_KEY
 from ..models.patient import (
-    ARV_CLASSES, ChildPugh, LabResult, PatientProfile, Pregnancy, TreatmentStatus,
+    ARV_CLASSES, ChildPugh, GenotypeTest, LabResult, PatientProfile, Pregnancy, TreatmentStatus,
 )
+
+MAX_GENOTYPES = 5
+SUBTYPES = ("", "A1", "A6", "B", "C", "D", "F", "G", "CRF01_AE", "CRF02_AG", "other")
+TROPISMS = ("unknown", "R5", "X4", "dual/mixed")
 
 Errors = Dict[str, str]
 
@@ -66,6 +70,31 @@ def _subset(values: Iterable[str], allowed: Iterable[str], name: str, errors: Er
     return frozenset(v for v in values if v in allowed)
 
 
+def _genotypes(form: Mapping[str, Any], errors: Errors) -> List[GenotypeTest]:
+    """Genotype rows g0_..g4_ from the form, or a ``genotypes`` list in JSON."""
+    rows: List[Mapping[str, Any]] = []
+    raw = form.get("genotypes")
+    if isinstance(raw, list):
+        rows = [r for r in raw if isinstance(r, dict)]
+    else:
+        for i in range(MAX_GENOTYPES):
+            rows.append({k: form.get(f"g{i}_{k}") or "" for k in
+                         ("date", "source", "rt", "pr", "integrase", "sequence")})
+    tests = []
+    for i, r in enumerate(rows):
+        fields = {k: str(r.get(k) or "").strip() for k in ("date", "source", "rt", "pr", "integrase", "sequence")}
+        if not any(fields[k] for k in ("rt", "pr", "integrase", "sequence")) and not fields["date"]:
+            continue
+        if fields["source"] not in ("", "plasma", "proviral"):
+            errors[f"g{i}_source"] = "Source must be plasma or proviral."
+        if len(fields["sequence"]) > 20000:
+            errors[f"g{i}_sequence"] = "Sequence too long (max 20,000 characters)."
+        tests.append(GenotypeTest(date=fields["date"][:10], source=fields["source"] or "plasma",
+                                  rt=fields["rt"][:500], pr=fields["pr"][:500], integrase=fields["integrase"][:500],
+                                  sequence=fields["sequence"]))
+    return tests
+
+
 def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Errors]:
     errors: Errors = {}
     age = _number(form, "age", errors, 0, 120, required=True, label="Age")
@@ -84,7 +113,17 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
     if status is TreatmentStatus.NAIVE:
         failed = frozenset()
 
-    genotype = form.get("genotype") == "available" or _bool(form, "genotype_available")
+    genotypes = _genotypes(form, errors)
+    genotype = form.get("genotype") == "available" or _bool(form, "genotype_available") or bool(genotypes)
+    if genotypes and form.get("genotype") == "pending":
+        genotype = True
+    threshold = _number(form, "minority_threshold", errors, 1, 50, integer=False, label="Minority-variant threshold")
+    subtype = form.get("subtype") or ""
+    if subtype not in SUBTYPES:
+        errors["subtype"] = "Unknown subtype."
+    tropism = form.get("tropism") or "unknown"
+    if tropism not in TROPISMS:
+        errors["tropism"] = "Unknown tropism result."
     profile_kwargs = dict(
         age=age or 0,
         sex=sex,
@@ -107,6 +146,11 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
         rt_mutations=(form.get("rt_mutations") or "").strip()[:500] if genotype else "",
         pr_mutations=(form.get("pr_mutations") or "").strip()[:500] if genotype else "",
         in_mutations=(form.get("in_mutations") or "").strip()[:500] if genotype else "",
+        genotypes=tuple(genotypes) if genotype else (),
+        use_hivdb=_bool(form, "use_hivdb"),
+        minority_threshold=threshold or 20.0,
+        subtype=subtype,
+        tropism=tropism,
         comorbidities=_subset(_getlist(form, "comorbidities"), COMORBIDITIES, "comorbidities", errors),
         comedications=_subset(_getlist(form, "comedications"), COMEDICATIONS_BY_KEY, "comedications", errors),
         prefers_single_tablet=_bool(form, "prefers_single_tablet"),

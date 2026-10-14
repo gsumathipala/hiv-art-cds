@@ -16,6 +16,22 @@
     update();
   }
 
+  // Genotype rows: show filled rows plus one empty row; "+ Add another test" reveals the next
+  const rows = Array.from(document.querySelectorAll("[data-genotype-row]"));
+  if (rows.length) {
+    const filled = (row) => Array.from(row.querySelectorAll("input[type=text], input[type=date], textarea"))
+      .some((el) => el.value.trim() !== "");
+    let last = 0;
+    rows.forEach((row, i) => { if (filled(row)) last = i; });
+    rows.forEach((row, i) => { row.hidden = i > last; });
+    const add = document.getElementById("add-genotype");
+    if (add) add.addEventListener("click", () => {
+      const next = rows.find((r) => r.hidden);
+      if (next) next.hidden = false;
+      if (!rows.some((r) => r.hidden)) add.hidden = true;
+    });
+  }
+
   // Tabs: <div class="tabs" data-tabs> buttons with aria-controls
   document.querySelectorAll("[data-tabs]").forEach((bar) => {
     const buttons = bar.querySelectorAll("button[aria-controls]");

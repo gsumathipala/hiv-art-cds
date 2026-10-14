@@ -9,7 +9,7 @@ from ..knowledge.cases import CASES, CASES_BY_KEY
 from ..knowledge.conditions import COMORBIDITIES
 from ..knowledge.interactions import COMEDICATIONS
 from ..models.patient import ARV_CLASSES
-from .forms import parse_patient
+from .forms import SUBTYPES, TROPISMS, parse_patient
 
 bp = Blueprint("assess", __name__)
 
@@ -25,6 +25,8 @@ def _form_context(values: MultiDict, errors=None):
         "comedication_groups": groups,
         "arv_classes": ARV_CLASSES,
         "cases": CASES,
+        "subtypes": SUBTYPES,
+        "tropisms": TROPISMS,
     }
 
 

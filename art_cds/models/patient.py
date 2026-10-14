@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import FrozenSet, Optional
+from typing import FrozenSet, Optional, Tuple
 
 
 class TreatmentStatus(str, Enum):
@@ -53,6 +53,23 @@ ARV_CLASSES = ("NRTI", "NNRTI", "INSTI", "PI")
 
 
 @dataclass(frozen=True)
+class GenotypeTest:
+    """One resistance test. Mutations may carry a variant frequency, e.g. ``K103N:12%``."""
+
+    date: str = ""  # ISO date or month
+    source: str = "plasma"  # plasma RNA | proviral DNA
+    rt: str = ""
+    pr: str = ""
+    integrase: str = ""
+    sequence: str = ""  # optional FASTA (analysed by Stanford HIVdb when enabled)
+
+    @property
+    def label(self) -> str:
+        kind = "proviral DNA" if self.source == "proviral" else "plasma RNA"
+        return f"{self.date or 'undated'} · {kind}"
+
+
+@dataclass(frozen=True)
 class PatientProfile:
     age: int
     sex: str = "male"  # sex registered at birth: male | female
@@ -75,9 +92,14 @@ class PatientProfile:
     hcv: bool = False
 
     genotype_available: bool = False
-    rt_mutations: str = ""
+    rt_mutations: str = ""  # shorthand for a single current genotype
     pr_mutations: str = ""
     in_mutations: str = ""
+    genotypes: Tuple[GenotypeTest, ...] = ()  # full history, including archived/proviral tests
+    use_hivdb: bool = False  # send mutations/sequences to Stanford HIVdb
+    minority_threshold: float = 20.0  # % below which NGS minority variants are reported but not scored
+    subtype: str = ""
+    tropism: str = "unknown"  # unknown | R5 | X4 | dual/mixed
 
     comorbidities: FrozenSet[str] = frozenset()
     comedications: FrozenSet[str] = frozenset()
@@ -96,3 +118,13 @@ class PatientProfile:
 
     def takes(self, comedication: str) -> bool:
         return comedication in self.comedications
+
+    @property
+    def genotype_history(self) -> Tuple[GenotypeTest, ...]:
+        """All resistance tests; the shorthand fields count as one current plasma test."""
+        tests = list(self.genotypes)
+        if self.rt_mutations or self.pr_mutations or self.in_mutations:
+            tests.append(GenotypeTest(rt=self.rt_mutations, pr=self.pr_mutations, integrase=self.in_mutations))
+        if not tests and self.genotype_available:
+            tests.append(GenotypeTest())  # tested, no mutations
+        return tuple(tests)

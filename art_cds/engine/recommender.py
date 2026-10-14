@@ -9,7 +9,7 @@ from ..models import PatientProfile, RegimenAssessment, Report
 from . import rules
 from .alerts import patient_alerts
 from .monitoring import monitoring_plan
-from .resistance import ResistanceReport, interpret, regimen_gss
+from .resistance import ResistanceReport, interpret_history, regimen_gss
 
 
 def assess_regimen(regimen: Regimen, tier: str, ctx: rules.RuleContext, label: str = "",
@@ -25,8 +25,9 @@ def assess_regimen(regimen: Regimen, tier: str, ctx: rules.RuleContext, label: s
 
 def recommend(patient: PatientProfile) -> Report:
     resistance: Optional[ResistanceReport] = None
-    if patient.genotype_available:
-        resistance = interpret(patient.rt_mutations, patient.pr_mutations, patient.in_mutations)
+    tests = patient.genotype_history
+    if tests:
+        resistance = interpret_history(tests, patient.minority_threshold, patient.use_hivdb)
     ctx = rules.RuleContext(patient, resistance)
 
     assessments: List[RegimenAssessment] = []

@@ -105,15 +105,20 @@
       <h3>Genotypic susceptibility</h3>
       {% set res = report.resistance %}
       <p class="small">{% for g, muts in res.mutations.items() if muts %}<b>{{ g }}:</b> {{ muts|join(', ') }}<br>{% else %}No resistance mutations entered (wild type).{% endfor %}</p>
-      {% if res.unrecognised %}<p class="small err">Not scored: {{ res.unrecognised|join(', ') }}</p>{% endif %}
+      <p class="small"><span class="badge {{ 'b-preferred' if res.source == 'hivdb' else 'b-other' }}">{{ res.version }}</span>
+        {% if res.subtype %}<span class="badge b-info">Subtype {{ res.subtype }}</span>{% endif %}</p>
+      {% if res.tests|length > 1 %}<details class="small"><summary>{{ res.tests|length }} tests combined</summary>
+        <ul>{% for t in res.tests %}<li>{{ t.label }}: {% for g, ms in t.mutations.items() if ms %}<b>{{ g }}</b> {{ ms|join(', ') }} {% else %}no mutations{% endfor %}</li>{% endfor %}</ul></details>{% endif %}
+      {% if res.unrecognised %}<p class="small err">Invalid notation ignored: {{ res.unrecognised|join(', ') }}</p>{% endif %}
       <table class="data">
         {% for code in ['BIC','DTG','CAB','RAL','DOR','RPV','EFV','DRV','ATV','TDF','ABC','3TC','FTC','AZT'] %}
           {% set s = res.get(code) %}
           <tr><td>{{ DRUGS[code].name }}</td><td><span class="lvl lvl-{{ s.level }}" title="{{ s.label }} (score {{ s.score|int }})">{{ s.label.split(' ')[0] if s.level > 1 else 'S' }}</span></td></tr>
         {% endfor %}
       </table>
-      <p class="small muted" style="margin-top:6px">Simplified HIVdb-style scores — confirm with the laboratory report or
-        <a href="https://hivdb.stanford.edu" target="_blank" rel="noopener">Stanford HIVdb</a>.
+      <p class="small muted" style="margin-top:6px">{% if res.source == 'hivdb' %}Scored by the Stanford HIVdb algorithm.{% else %}Local approximate
+        scores for teaching — tick “Use Stanford HIVdb” for the full algorithm.{% endif %} Always reconcile with the
+        laboratory report.
         <a href="{{ url_for('learn.resistance') }}">How this works</a></p>
     </div>
     {% endif %}

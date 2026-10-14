@@ -92,7 +92,7 @@ CASES: Tuple[Case, ...] = (
         {"age": "41", "sex": "female", "pregnancy": "not_pregnant", "weight_kg": "66", "status": "failure",
          "failed_classes": ("NNRTI", "NRTI"), "viral_load": "15000", "cd4": "210", "crcl": "96",
          "hbsag": "negative", "hla_b5701": "negative", "genotype": "available",
-         "rt_mutations": "K65R, M184V, K103N"},
+         "g0_date": "2026-09-01", "g0_rt": "K65R, M184V, K103N"},
         ("K65R reduces tenofovir and abacavir activity but increases zidovudine susceptibility; M184V makes "
          "lamivudine/emtricitabine only partly active.",
          "A fully active, high-barrier anchor (dolutegravir or boosted darunavir) is the priority after failure; "

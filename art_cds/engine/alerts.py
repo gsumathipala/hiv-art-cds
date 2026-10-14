@@ -15,9 +15,12 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
     add = lambda level, msg, *refs: a.append(Alert(level, msg, tuple(refs)))  # noqa: E731
 
     if not viable:
-        add("critical", "No regimen in this tool meets all constraints. Discuss at the HIV MDT / virtual clinic; options "
-            "for multiclass resistance include etravirine, maraviroc (after tropism testing), fostemsavir and "
-            "lenacapavir.", guideline(BHIVA_ART))
+        mvc = {"R5": "maraviroc is an option (R5 tropism)", "X4": "maraviroc is NOT an option (X4 tropism)",
+               "dual/mixed": "maraviroc is NOT an option (dual/mixed tropism)"}.get(
+            p.tropism, "maraviroc needs a tropism test first")
+        add("critical", "No regimen in this tool meets all constraints. Discuss at the HIV MDT / resistance virtual "
+            f"clinic. Agents for multiclass resistance include etravirine, fostemsavir and lenacapavir; {mvc}.",
+            guideline(BHIVA_ART))
     if p.age < 18:
         add("critical", "This tool covers adults. Follow CHIVA/PENTA guidance for children and adolescents.")
     if p.weight_kg is not None and p.weight_kg < 40:
@@ -85,8 +88,22 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
         add("info", "Long-acting cabotegravir + rilpivirine is licensed only for people already suppressed on oral ART.")
     if res is not None:
         if res.unrecognised:
-            add("warning", "Mutations not scored by this tool: " + ", ".join(res.unrecognised)
-                + ". Check them with the laboratory report or Stanford HIVdb.")
+            add("warning", "Not valid mutation notation (ignored): " + ", ".join(res.unrecognised) + ".")
+        if res.source == "local":
+            add("info", "Resistance scored with the local teaching approximation. Tick 'Use Stanford HIVdb' for the "
+                "full HIVdb algorithm" + (" — these mutations are not in the local table: "
+                                         + ", ".join(res.not_in_local_table) if res.not_in_local_table else "") + ".")
+        else:
+            add("info", f"Resistance scored by {res.version} (cumulative genotype).")
+        for w in res.warnings:
+            add("warning", w)
+        if res.minority:
+            add("info", f"Minority variants below the {p.minority_threshold:g}% threshold, reported but not scored: "
+                + ", ".join(res.minority) + ". Low-frequency NNRTI or INSTI variants can still matter clinically.")
+        if res.archived_only:
+            add("info", "Archived (proviral DNA) mutations not seen in plasma: " + ", ".join(res.archived_only)
+                + ". They are included in the scoring; proviral testing can miss archived mutations, so a negative "
+                "result does not exclude them.")
         if len(res.resistant_classes()) >= 2:
             add("warning", "Resistance in two or more drug classes — discuss at the HIV MDT / resistance virtual clinic.",
                 guideline(BHIVA_ART))
