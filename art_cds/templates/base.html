@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ART Navigator{% endblock %} · ART Navigator UK</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="{{ url_for('assess.index') }}">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="9" fill="none" stroke="#1d4e89" stroke-width="2.5"/>
+          {% for a in range(0, 360, 45) %}<g transform="rotate({{ a }} 16 16)"><line x1="16" y1="7" x2="16" y2="3.5" stroke="#0f8b8d" stroke-width="2"/><circle cx="16" cy="3" r="1.8" fill="#0f8b8d"/></g>{% endfor %}
+          <path d="M12 16h8M16 12v8" stroke="#1d4e89" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <span>ART Navigator<small>HIV antiretroviral decision support &amp; learning · UK</small></span>
+      </a>
+      {% set ep = request.endpoint or '' %}
+      <nav class="nav">
+        <a href="{{ url_for('learn.hub') }}" class="{{ 'active' if ep in ('learn.hub','learn.drug_class','learn.drug') }}">Learn</a>
+        <a href="{{ url_for('learn.formulary') }}" class="{{ 'active' if ep in ('learn.formulary','learn.product') }}">UK formulary</a>
+        <a href="{{ url_for('learn.regimens') }}" class="{{ 'active' if ep == 'learn.regimens' }}">Regimens</a>
+        <a href="{{ url_for('learn.interactions') }}" class="{{ 'active' if ep == 'learn.interactions' }}">Interactions</a>
+        <a href="{{ url_for('learn.resistance') }}" class="{{ 'active' if ep == 'learn.resistance' }}">Resistance</a>
+        <a href="{{ url_for('learn.cases') }}" class="{{ 'active' if ep == 'learn.cases' }}">Cases</a>
+        <a href="{{ url_for('learn.about') }}" class="{{ 'active' if ep == 'learn.about' }}">Sources</a>
+        <a href="{{ url_for('assess.form') }}" class="cta">Assess a patient</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="banner no-print"><b>For use by HIV clinicians.</b> This tool supports clinical judgement and teaching; it
+        does not replace it. Check the current SmPC, BHIVA guidance and the
+        <a href="https://www.hiv-druginteractions.org" target="_blank" rel="noopener">Liverpool HIV interaction checker</a>
+        and discuss complex cases with your HIV MDT and pharmacist.</div>
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      ART Navigator v{{ app_version }} · Product information is reproduced from UK Summaries of Product Characteristics
+      on the <a href="https://www.medicines.org.uk/emc" target="_blank" rel="noopener">electronic medicines compendium (emc)</a>;
+      each page states the SmPC version used. Regimen tiers follow the BHIVA adult ART guidelines (2025 interim update) and BHIVA pregnancy guidelines (2025).
+      Tablet illustrations are drawn from SmPC section 3 descriptions, not photographs.
+    </div>
+  </footer>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

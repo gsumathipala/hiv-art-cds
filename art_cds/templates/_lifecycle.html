@@ -1,0 +1,66 @@
+{# HIV-1 replication cycle with the step each drug class blocks. #}
+{% set steps = [
+  ('entry', 'Attachment & fusion', 'gp120 binds CD4 then CCR5/CXCR4', 70, 250),
+  ('uncoating', 'Capsid transport & uncoating', 'capsid docks at the nuclear pore', 215, 170),
+  ('reverse-transcription', 'Reverse transcription', 'RNA → double-stranded DNA', 370, 250),
+  ('integration', 'Integration', 'integrase inserts provirus', 540, 330),
+  ('transcription', 'Transcription & translation', 'host machinery makes viral RNA/protein', 710, 250),
+  ('assembly', 'Assembly & budding', 'Gag/Gag-Pol at the membrane', 860, 170),
+  ('maturation', 'Maturation', 'protease cleaves Gag-Pol', 1010, 250),
+] %}
+{% set tags = [
+  ('entry', 'Entry', 'Entry', 'var(--entry)'),
+  ('uncoating', 'Capsid', 'Capsid', 'var(--capsid)'),
+  ('reverse-transcription', 'NRTI', 'NRTI', 'var(--nrti)'),
+  ('reverse-transcription', 'NNRTI', 'NNRTI', 'var(--nnrti)'),
+  ('integration', 'INSTI', 'INSTI', 'var(--insti)'),
+  ('assembly', 'Capsid', 'Capsid', 'var(--capsid)'),
+  ('maturation', 'PI', 'PI', 'var(--pi)'),
+] %}
+<svg class="lifecycle" viewBox="0 0 1100 430" role="img" aria-labelledby="lc-title lc-desc">
+  <title id="lc-title">HIV-1 replication cycle and antiretroviral targets</title>
+  <desc id="lc-desc">Seven steps from attachment to maturation, each labelled with the antiretroviral class that blocks it.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10z" fill="#8a96a8"/></marker>
+  </defs>
+  <!-- host cell and nucleus -->
+  <rect x="20" y="60" width="1060" height="355" rx="60" fill="color-mix(in srgb, var(--accent) 6%, transparent)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="44" y="88" font-size="13" fill="var(--accent)" font-weight="700">CD4⁺ T cell</text>
+  <ellipse cx="545" cy="345" rx="250" ry="62" fill="color-mix(in srgb, var(--brand) 8%, transparent)" stroke="var(--brand)" stroke-width="1.6"/>
+  <text x="545" y="398" text-anchor="middle" font-size="12" fill="var(--brand)" font-weight="700">Nucleus — host DNA</text>
+  <path d="M400,345 q30,-14 60,0 t60,0 t60,0 t60,0 t60,0" fill="none" stroke="var(--brand)" stroke-width="2"/>
+  <rect x="505" y="336" width="80" height="16" rx="4" fill="var(--insti)" opacity=".8"/>
+  <text x="545" y="348" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">provirus</text>
+  <!-- virion arriving and leaving -->
+  {% for (cx, cy, r) in [(70, 30, 22), (1010, 30, 22)] %}
+    <circle cx="{{ cx }}" cy="{{ cy }}" r="{{ r }}" fill="var(--surface)" stroke="var(--pi)" stroke-width="2"/>
+    {% for a in range(0, 360, 45) %}<line x1="{{ cx }}" y1="{{ cy - r }}" x2="{{ cx }}" y2="{{ cy - r - 6 }}" stroke="var(--pi)" stroke-width="2" transform="rotate({{ a }} {{ cx }} {{ cy }})"/>{% endfor %}
+    <path d="M{{ cx - 7 }},{{ cy + 8 }} L{{ cx }},{{ cy - 9 }} L{{ cx + 7 }},{{ cy + 8 }}z" fill="color-mix(in srgb, var(--capsid) 35%, transparent)" stroke="var(--capsid)"/>
+  {% endfor %}
+  <text x="100" y="22" font-size="11" fill="var(--ink-2)">HIV virion</text>
+  <text x="1040" y="22" font-size="11" fill="var(--ink-2)">new infectious virion</text>
+  <line x1="70" y1="60" x2="70" y2="215" stroke="#8a96a8" stroke-width="1.8" marker-end="url(#arr)"/>
+  {% for i in range(steps|length - 1) %}
+    {% set a = steps[i] %}{% set b = steps[i + 1] %}
+    <line x1="{{ a[3] + 58 }}" y1="{{ a[4] }}" x2="{{ b[3] - 60 }}" y2="{{ b[4] }}" stroke="#8a96a8" stroke-width="1.8" marker-end="url(#arr)"/>
+  {% endfor %}
+  <line x1="1010" y1="215" x2="1010" y2="58" stroke="#8a96a8" stroke-width="1.8" marker-end="url(#arr)"/>
+  {% for key, title, sub, x, y in steps %}
+    <g class="step">
+      <rect class="lbl" x="{{ x - 72 }}" y="{{ y - 32 }}" width="144" height="52" rx="10"/>
+      <text x="{{ x }}" y="{{ y - 12 }}" text-anchor="middle" font-weight="700">{{ title }}</text>
+      <text x="{{ x }}" y="{{ y + 6 }}" text-anchor="middle" font-size="9.5" fill="var(--ink-2)" style="font-size:9.5px">{{ sub }}</text>
+    </g>
+  {% endfor %}
+  {% set placed = {} %}
+  {% for step, code, label, colour in tags %}
+    {% for key, title, sub, x, y in steps if key == step %}
+      {% set n = placed.get(step, 0) %}{% set _ = placed.update({step: n + 1}) %}
+      <a href="{{ url_for('learn.drug_class', code=code) }}">
+        <rect class="tag" x="{{ x - 60 + n * 64 }}" y="{{ y + 26 }}" width="58" height="20" rx="10" fill="{{ colour }}"/>
+        <text class="tagtext" x="{{ x - 31 + n * 64 }}" y="{{ y + 40 }}" text-anchor="middle">{{ label }}</text>
+      </a>
+    {% endfor %}
+  {% endfor %}
+</svg>

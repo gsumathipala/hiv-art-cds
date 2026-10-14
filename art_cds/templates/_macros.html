@@ -1,0 +1,74 @@
+{% macro cls_badge(code) -%}
+  {%- set d = DRUGS[code] -%}<span class="cls cls-{{ d.drug_class }}" title="{{ d.klass.name }}">{{ d.drug_class }}</span>
+{%- endmacro %}
+
+{% macro ref_link(ref) -%}
+  {%- if ref.product -%}
+    {%- set doc = smpc_doc(ref.product) -%}
+    <a class="ref" href="{{ url_for('learn.product', key=ref.product) }}#s-{{ ref.section }}"
+       title="{{ doc.name if doc else '' }}">{{ ref.label() }}</a>
+  {%- else -%}<span class="ref" title="{{ ref.title or ref.guideline }}">{{ ref.label()|truncate(48) }}</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro product_picture(key, compact=False, faces=2) -%}
+  {%- set photo = pill_photo(key) -%}
+  {%- if photo -%}
+    <img src="{{ url_for('static', filename=photo) }}" alt="{{ PRODUCTS[key].brand }}">
+  {%- else -%}
+    {%- set units = pill_units(key) -%}
+    {%- if units -%}
+      {%- for u in (units[-1:] if compact else units) -%}{{ pill_svg(u, key ~ loop.index ~ faces, 1 if compact else faces)|safe }}{%- endfor -%}
+    {%- else -%}<span class="small muted">{{ 'SmPC not downloaded' if not smpc_doc(key) else 'No appearance description' }}</span>{%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro smpc_blocks(blocks) -%}
+  {%- for b in blocks -%}
+    {%- if b.type == 'h' -%}<h4>{{ b.text }}</h4>
+    {%- elif b.type == 'p' -%}<p>{{ b.text }}</p>
+    {%- elif b.type == 'list' -%}<ul>{% for i in b['items'] %}<li>{{ i }}</li>{% endfor %}</ul>
+    {%- elif b.type == 'table' -%}<div class="table-scroll"><table>{% for row in b.rows %}<tr>{% for c in row %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</table></div>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endmacro %}
+
+{% set FREQ_COLOURS = {'very common': 'var(--f-vc)', 'common': 'var(--f-c)', 'uncommon': 'var(--f-u)', 'rare': 'var(--f-r)', 'very rare': 'var(--f-vr)', 'not known': 'var(--f-nk)'} %}
+
+{% macro freq_legend() -%}
+  <div class="freq-legend">
+    <span style="--c: var(--f-vc)">Very common ≥1/10</span><span style="--c: var(--f-c)">Common ≥1/100</span>
+    <span style="--c: var(--f-u)">Uncommon ≥1/1,000</span><span style="--c: var(--f-r)">Rare ≥1/10,000</span>
+    <span style="--c: var(--f-vr)">Very rare</span><span style="--c: var(--f-nk)">Not known</span>
+  </div>
+{%- endmacro %}
+
+{% macro adverse_grid(grid, counts) -%}
+  {%- if grid -%}
+    <div class="freq-bars" style="max-width:520px;margin-bottom:12px">
+      {%- set mx = (counts|map(attribute=1)|max) or 1 -%}
+      {%- for f, n in counts -%}
+        <div class="fb"><span>{{ f|capitalize }}</span><span><i style="--c: {{ FREQ_COLOURS[f] }}; width: {{ (100 * n / mx)|round(1) }}%"></i></span><b>{{ n }}</b></div>
+      {%- endfor -%}
+    </div>
+    {{ freq_legend() }}
+    <div class="ae-grid">
+      {%- for soc, freqs in grid.items() -%}
+        <div class="ae-soc">{{ soc }}</div>
+        <div>
+          {%- for f in ['very common','common','uncommon','rare','very rare','not known'] -%}
+            {%- for r in freqs.get(f, []) -%}<span class="ae-tag{{ ' light' if f in ('uncommon','not known') }}" style="--c: {{ FREQ_COLOURS[f] }}" title="{{ f }}">{{ r }}</span>{%- endfor -%}
+          {%- endfor -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- else -%}
+    <p class="muted small">The adverse-reaction table could not be summarised automatically — see SmPC section 4.8 below.</p>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro source_line(doc) -%}
+  {%- if doc -%}
+  <div class="source">Source: <a href="{{ doc.url }}" target="_blank" rel="noopener">{{ doc.name }} — SmPC on emc</a>
+    · {{ doc.company }} · text revised {{ doc.revision }} · retrieved {{ doc.retrieved }}</div>
+  {%- endif -%}
+{%- endmacro %}

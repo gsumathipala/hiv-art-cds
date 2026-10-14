@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Sources & method{% endblock %}
+{% block content %}
+<h1>Sources and method</h1>
+<div class="grid two">
+  <div class="card">
+    <h3>How a recommendation is made</h3>
+    <ol class="small">
+      <li>Regimens available in the scenario (first-line, switch, failure) start from their BHIVA tier.</li>
+      <li>Independent rule modules assess each regimen: HLA-B*57:01, hepatitis B, renal and hepatic function (per-product SmPC §4.2),
+        pregnancy (SmPC §4.6 and BHIVA), viral load and CD4 restrictions, treatment history, genotypic resistance, drug interactions
+        (SmPC §4.3/4.5), comorbidities and the patient's priorities.</li>
+      <li>Each finding excludes the regimen, scores it up or down, or adds information, and cites its source.</li>
+      <li>Regimens are ranked by score; excluded ones are listed with their reasons.</li>
+    </ol>
+    <h3>Guidelines</h3>
+    <ul class="small">
+      <li>BHIVA guidelines on antiretroviral treatment for adults living with HIV-1 2022 (2025 interim update)</li>
+      <li>BHIVA guidelines on the management of HIV in pregnancy and the postpartum period (2025)</li>
+      <li>BHIVA guidelines on tuberculosis, hepatitis co-infection, and routine monitoring</li>
+      <li>NICE TA757 — cabotegravir with rilpivirine long-acting</li>
+    </ul>
+    <h3>Limitations</h3>
+    <p class="small">The tool covers adults. It does not model every interaction, every resistance mutation, or salvage
+      therapy beyond flagging the need for expert input. Recommendation tiers are an interpretation of the guidelines. Always
+      check the current SmPC and guidelines, and discuss complex cases with your HIV MDT.</p>
+  </div>
+  <div class="card">
+    <h3>UK Summaries of Product Characteristics used</h3>
+    <p class="small muted">Downloaded from emc and parsed by <code>tools/fetch_smpc.py</code>. Every SmPC and BHIVA statement the engine
+      relies on is checked against the source text by <code>tools/verify_smpc.py</code>.</p>
+    <table class="data">
+      <tr><th>Product</th><th>SmPC</th><th>Revised</th></tr>
+      {% for p, doc in docs %}
+      <tr><td><a href="{{ url_for('learn.product', key=p.key) }}">{{ p.brand }}</a></td>
+        <td class="small">{% if doc %}<a href="{{ doc.url }}" target="_blank" rel="noopener">{{ doc.name }}</a>{% else %}<span class="err">not downloaded</span>{% endif %}</td>
+        <td class="small">{{ doc.revision if doc else '' }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

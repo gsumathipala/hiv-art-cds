@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Learn{% endblock %}
+{% block content %}
+<h1>Learn: antiretroviral pharmacology</h1>
+<p class="muted">Start from the viral life cycle, then go into each class, drug and UK product. Product pages reproduce the UK SmPC
+  and add visual summaries of appearance, adverse reactions and pharmacology.</p>
+<div class="card">{% include "_lifecycle.html" %}</div>
+
+<h2 style="margin-top:24px">Drug classes</h2>
+<div class="grid three">
+  {% for code, klass in CLASSES.items() %}
+  <div class="card">
+    <div class="row"><span class="cls cls-{{ code }}">{{ code }}</span><h3 style="margin:0"><a href="{{ url_for('learn.drug_class', code=code) }}">{{ klass.name }}</a></h3></div>
+    <p class="small" style="margin-top:8px">{{ klass.mechanism|truncate(220) }}</p>
+    <div>{% for d in by_class.get(code, []) %}<a class="chip" href="{{ url_for('learn.drug', code=d.code) }}">{{ d.name }}</a>{% endfor %}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 style="margin-top:24px">Explore</h2>
+<div class="grid four">
+  <a class="entry" href="{{ url_for('learn.formulary') }}"><b>UK formulary</b>Every product drawn from its SmPC description — identify tablets at a glance.</a>
+  <a class="entry" href="{{ url_for('learn.regimens') }}"><b>Regimens & BHIVA tiers</b>Preferred, alternative and other regimens by scenario.</a>
+  <a class="entry" href="{{ url_for('learn.interactions') }}"><b>Interaction matrix</b>Co-medications × antiretrovirals, each cell from SmPC 4.3/4.5.</a>
+  <a class="entry" href="{{ url_for('learn.resistance') }}"><b>Resistance primer</b>Key mutations, what they do and how they are scored.</a>
+</div>
+{% endblock %}

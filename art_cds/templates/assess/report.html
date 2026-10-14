@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ref_link, product_picture, cls_badge with context %}
+{% block title %}Recommendation{% endblock %}
+{% set p = report.patient %}
+{% set ICON = {'benefit': '+', 'caution': '!', 'info': 'i', 'exclude': '×'} %}
+{% macro finding_item(f) %}
+  <li class="f-{{ f.severity.value }}"><span class="ficon">{{ ICON[f.severity.value] }}</span>
+    <div>{{ f.message }}{% if f.refs %}<span class="refs">{% for r in f.refs %}{{ ref_link(r) }}{% endfor %}</span>{% endif %}
+      {% if f.teaching %}<div class="teach">{{ f.teaching }}</div>{% endif %}</div></li>
+{% endmacro %}
+{% block content %}
+<div class="row no-print" style="margin-bottom:10px">
+  <h1 style="margin:0">Regimen recommendation</h1><span class="spacer"></span>
+  <a class="btn ghost" href="javascript:history.back()">← Edit inputs</a>
+  <button class="btn ghost" onclick="window.print()">Print</button>
+</div>
+
+{% for a in report.alerts %}
+  <div class="alert {{ a.level }}">{{ a.message }}{% if a.refs %}<span class="refs">{% for r in a.refs %}{{ ref_link(r) }}{% endfor %}</span>{% endif %}</div>
+{% endfor %}
+
+{% if case %}
+<div class="card" style="margin:12px 0;border-left:4px solid var(--accent)">
+  <h3>Teaching case: {{ case.title }}</h3>
+  <ul>{% for lp in case.learning_points %}<li>{{ lp }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<div class="report-layout" style="margin-top:14px">
+  <div>
+    {% set best = report.top.score if report.top else 100 %}
+    {% for a in report.recommended %}
+    {% set r = a.regimen %}
+    <article class="reg {{ 'top' if loop.first }}">
+      <div class="reg-head">
+        <div class="rank">{{ loop.index }}</div>
+        <div>
+          <div class="reg-title">{{ r.short }} {% for c in r.core_agents %}{{ cls_badge(c) }} {% endfor %}</div>
+          <div class="reg-sub">{% for c in r.components %}{{ DRUGS[c].name }}{{ ' · ' if not loop.last }}{% endfor %}</div>
+        </div>
+        <span class="spacer"></span>
+        <span class="badge b-{{ a.tier }}" title="{{ a.tier_ref.title if a.tier_ref else '' }}">BHIVA: {{ a.tier_label }}</span>
+        {% if a.tier_ref %}{{ ref_link(a.tier_ref) }}{% endif %}
+        <div title="Decision score {{ a.score|round(0)|int }}">
+          <div class="scorebar"><i style="width: {{ [100, [5, 100 * a.score / (best if best > 0 else 1)]|max]|min }}%"></i></div>
+          <div class="small muted" style="text-align:right">score {{ a.score|round(0)|int }}{% if a.gss is not none %} · GSS {{ a.gss }}{% endif %}</div>
+        </div>
+      </div>
+      <div class="reg-body">
+        <div>
+          <div class="group-title">What the patient takes</div>
+          <div class="takes">
+            {% for key in r.products %}
+            <div class="take">{{ product_picture(key, compact=True) }}
+              <a href="{{ url_for('learn.product', key=key) }}">{{ PRODUCTS[key].brand }}</a></div>
+            {% endfor %}
+          </div>
+          <p style="margin-top:10px"><b>Dosing:</b> {{ r.dosing }}<br><span class="small muted">{{ r.food }}</span></p>
+          {% for d in a.dose_changes %}<div class="dose"><b>Dose adjustment:</b> {{ d }}</div>{% endfor %}
+          {% if a.monitoring %}
+          <details><summary class="small"><b>Monitoring plan</b></summary>
+            <ul class="small">{% for m in a.monitoring %}<li>{{ m }}</li>{% endfor %}</ul></details>
+          {% endif %}
+        </div>
+        <div>
+          <div class="group-title">Reasoning</div>
+          <ul class="findings">
+            {% for sev in ['benefit', 'caution', 'info'] %}{% for f in a.findings if f.severity.value == sev %}{{ finding_item(f) }}{% endfor %}{% endfor %}
+            {% if not a.findings %}<li class="f-info"><span class="ficon">i</span><div>No patient-specific issues identified.</div></li>{% endif %}
+          </ul>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+
+    {% if report.excluded %}
+    <details class="card excluded">
+      <summary>{{ report.excluded|length }} regimen{{ 's' if report.excluded|length != 1 }} excluded for this patient — why?</summary>
+      {% for a in report.excluded %}
+      <div class="ex-row"><b>{{ a.regimen.short }}</b> <span class="badge b-{{ a.tier }}">{{ a.tier_label }}</span>
+        <ul class="findings">{% for f in a.findings if f.severity.value == 'exclude' %}{{ finding_item(f) }}{% endfor %}</ul></div>
+      {% endfor %}
+    </details>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <div class="card summary">
+      <h3>Patient</h3>
+      <dl>
+        <dt>Scenario</dt><dd>{{ p.status.label }}</dd>
+        <dt>Age / sex</dt><dd>{{ p.age }} · {{ p.sex }}{% if p.weight_kg %} · {{ p.weight_kg|round(1) }} kg{% endif %}</dd>
+        {% if p.sex == 'female' %}<dt>Pregnancy</dt><dd>{{ p.pregnancy.label }}{% if p.breastfeeding %} · breastfeeding{% endif %}</dd>{% endif %}
+        <dt>HIV RNA</dt><dd>{{ '{:,}'.format(p.viral_load) if p.viral_load is not none else 'unknown' }}</dd>
+        <dt>CD4</dt><dd>{{ p.cd4 if p.cd4 is not none else 'unknown' }}</dd>
+        <dt>CrCl</dt><dd>{{ (p.crcl|round(0)|int ~ ' mL/min') if p.crcl is not none else 'unknown' }}{% if p.on_dialysis %} · haemodialysis{% endif %}</dd>
+        <dt>Liver</dt><dd>{{ 'Child-Pugh ' ~ p.child_pugh.value if p.child_pugh.value != 'none' else 'no impairment' }}</dd>
+        <dt>HBsAg</dt><dd>{{ p.hbsag.value }}</dd>
+        <dt>HLA-B*57:01</dt><dd>{{ p.hla_b5701.value }}</dd>
+        {% if p.failed_classes %}<dt>Failed classes</dt><dd>{{ p.failed_classes|sort|join(', ') }}</dd>{% endif %}
+      </dl>
+    </div>
+    {% if report.resistance %}
+    <div class="card">
+      <h3>Genotypic susceptibility</h3>
+      {% set res = report.resistance %}
+      <p class="small">{% for g, muts in res.mutations.items() if muts %}<b>{{ g }}:</b> {{ muts|join(', ') }}<br>{% else %}No resistance mutations entered (wild type).{% endfor %}</p>
+      {% if res.unrecognised %}<p class="small err">Not scored: {{ res.unrecognised|join(', ') }}</p>{% endif %}
+      <table class="data">
+        {% for code in ['BIC','DTG','CAB','RAL','DOR','RPV','EFV','DRV','ATV','TDF','ABC','3TC','FTC','AZT'] %}
+          {% set s = res.get(code) %}
+          <tr><td>{{ DRUGS[code].name }}</td><td><span class="lvl lvl-{{ s.level }}" title="{{ s.label }} (score {{ s.score|int }})">{{ s.label.split(' ')[0] if s.level > 1 else 'S' }}</span></td></tr>
+        {% endfor %}
+      </table>
+      <p class="small muted" style="margin-top:6px">Simplified HIVdb-style scores — confirm with the laboratory report or
+        <a href="https://hivdb.stanford.edu" target="_blank" rel="noopener">Stanford HIVdb</a>.
+        <a href="{{ url_for('learn.resistance') }}">How this works</a></p>
+    </div>
+    {% endif %}
+    <div class="card small">
+      <h3>How the ranking works</h3>
+      <p>Each regimen starts from its BHIVA tier (top tier 100, second 80, third 60). Rule modules then add or
+        subtract points for patient-specific factors, each citing the UK SmPC or guideline it relies on.
+        Contraindications remove a regimen.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

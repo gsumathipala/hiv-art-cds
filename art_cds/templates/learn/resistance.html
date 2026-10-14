@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Resistance primer{% endblock %}
+{% block content %}
+<h1>Resistance primer</h1>
+<div class="grid two">
+  <div class="card">
+    <h3>How genotypes are scored here</h3>
+    <p>Each mutation adds a penalty score for each drug; some combinations add more. The total maps to a level, modelled on the
+      Stanford HIVdb approach:</p>
+    <table class="data">{% for lvl, label in levels.items() %}<tr><td><span class="lvl lvl-{{ lvl }}">{{ lvl }}</span></td><td>{{ label }}</td>
+      <td class="small muted">{{ ['score < 10','10–14','15–29','30–59','≥ 60'][lvl - 1] }}</td></tr>{% endfor %}</table>
+    <p class="small" style="margin-top:8px">A drug's contribution to the <b>genotypic susceptibility score (GSS)</b> is 1 (levels 1–2),
+      0.75 (3), 0.5 (4) or 0 (5). After virological failure, aim for at least two fully active drugs, or a fully active
+      high-barrier anchor (dolutegravir or boosted darunavir).</p>
+    <p class="small muted">The table is abridged and approximate, for teaching. Use the laboratory report or
+      <a href="https://hivdb.stanford.edu" target="_blank" rel="noopener">Stanford HIVdb</a> clinically.</p>
+  </div>
+  <div class="card">
+    <h3>Signature mutations</h3>
+    <table class="data">{% for m, note in notes.items() %}<tr><td class="mono"><b>{{ m }}</b></td><td class="small">{{ note }}</td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% for gene, (title, drugs) in genes.items() %}
+<h2 style="margin-top:22px">{{ title }} ({{ gene }})</h2>
+<div class="card table-scroll">
+  <table class="data">
+    <tr><th>Mutation</th>{% for d in drugs %}<th>{{ DRUGS[d].name if d in DRUGS else d }}</th>{% endfor %}</tr>
+    {% for m, s in scores[gene].items() %}
+    <tr><td class="mono"><b>{{ m }}</b></td>{% for d in drugs %}{% set v = s.get(d) %}
+      <td>{% if v %}<span class="lvl lvl-{{ 5 if v >= 60 else 4 if v >= 30 else 3 if v >= 15 else 2 if v >= 10 else 1 }}">{{ v }}</span>{% endif %}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+  {% set gcombos = combos|selectattr(0, 'equalto', gene)|list %}
+  {% if gcombos %}<h4>Combination penalties</h4><ul class="small">{% for g, groups, sc in gcombos %}
+    <li class="mono">{{ groups|map('join', '/')|join(' + ') }} → {% for d, v in sc.items() %}{{ d }} +{{ v }}{{ ', ' if not loop.last }}{% endfor %}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% endfor %}
+{% endblock %}

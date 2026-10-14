@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Cases{% endblock %}
+{% block content %}
+<h1>Worked teaching cases</h1>
+<p class="muted">Open a case to see it in the decision tool, change the inputs and watch the recommendation respond. The learning
+  points appear at the top of the report.</p>
+<div class="stack">
+{% for c in cases %}
+<div class="card">
+  <div class="row"><h3 style="margin:0">{{ c.title }}</h3><span class="spacer"></span>{% for t in c.topics %}<span class="chip">{{ t }}</span>{% endfor %}</div>
+  <p style="margin-top:8px">{{ c.summary }}</p>
+  <details><summary class="small"><b>Learning points</b></summary><ul>{% for lp in c.learning_points %}<li>{{ lp }}</li>{% endfor %}</ul></details>
+  <a class="btn" style="margin-top:10px" href="{{ url_for('assess.form', case=c.key) }}">Open in the decision tool</a>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

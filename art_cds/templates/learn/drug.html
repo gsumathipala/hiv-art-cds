@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_picture, smpc_blocks, adverse_grid, source_line with context %}
+{% block title %}{{ drug.name }}{% endblock %}
+{% macro section(name) %}{% if doc and doc.sections.get(name) %}{{ smpc_blocks(doc.sections[name].blocks) }}{% else %}<p class="muted">Not available in the downloaded SmPC.</p>{% endif %}{% endmacro %}
+{% block content %}
+<p class="small"><a href="{{ url_for('learn.hub') }}">Learn</a> ›
+  <a href="{{ url_for('learn.drug_class', code=drug.drug_class) }}">{{ drug.klass.name }}</a> › {{ drug.name }}</p>
+<div class="row"><h1 style="margin:0">{{ drug.name }} <span class="muted">({{ drug.code }})</span></h1>
+  <span class="cls cls-{{ drug.drug_class }}">{{ drug.drug_class }}</span></div>
+{% if drug.abbreviation_note %}<p class="small muted">{{ drug.abbreviation_note }}</p>{% endif %}
+<p class="small muted">Monograph source: {{ doc.name if doc else PRODUCTS[key].brand }} SmPC. Other products containing {{ drug.name|lower }} are listed under Formulations.</p>
+
+<div class="tabs" data-tabs role="tablist">
+  {% for id, label in [('overview','Overview'),('formulations','Formulations'),('dosing','Dosing'),('adverse','Adverse effects'),('interactions','Interactions'),('pregnancy','Pregnancy'),('pharmacology','Pharmacology'),('resistance','Resistance')] %}
+  <button type="button" role="tab" aria-controls="{{ id }}">{{ label }}</button>{% endfor %}
+</div>
+
+<section id="overview" class="tabpanel">
+  <div class="grid two">
+    <div class="card">
+      <h3>How it works</h3>
+      <p>{{ drug.klass.mechanism }}</p>
+      {% set mech = doc and smpc_mechanism(key) %}
+      {% if mech %}<p class="small"><b>SmPC §5.1:</b> “{{ mech }}”</p>{% endif %}
+      <h3>Indication (SmPC §4.1)</h3>{{ section('indications') }}
+    </div>
+    <div class="card">
+      <h3>At a glance</h3>
+      <div class="facts">
+        {% for label, sentence in pk %}<div class="fact"><b>{{ label }}</b><span class="small">{{ sentence }}</span></div>{% endfor %}
+      </div>
+      <p class="small muted" style="margin-top:8px">Sentences quoted from SmPC §5.2.</p>
+      <h3 style="margin-top:12px">Contraindications (SmPC §4.3)</h3>{{ section('contraindications') }}
+    </div>
+  </div>
+  {{ source_line(doc) }}
+</section>
+
+<section id="formulations" class="tabpanel">
+  <div class="grid three">
+    {% for p in products %}
+    {% set pd = smpc_doc(p.key) %}
+    <div class="card prod">
+      <div class="pic">{{ product_picture(p.key, faces=1) }}</div>
+      <h3><a href="{{ url_for('learn.product', key=p.key) }}">{{ p.brand }}</a></h3>
+      <div class="small">{{ pd.name if pd else '' }}</div>
+      <div>{% for c in p.ingredients %}<span class="chip">{{ DRUGS[c].name }}</span>{% endfor %}</div>
+      {% if pd %}<div class="appearance">{{ smpc_appearance(p.key) }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="dosing" class="tabpanel"><div class="card smpc-body"><h3>Posology and method of administration (SmPC §4.2)</h3>{{ section('posology') }}{{ source_line(doc) }}</div></section>
+
+<section id="adverse" class="tabpanel">
+  <div class="card"><h3>Adverse reactions by frequency (SmPC §4.8)</h3>{{ adverse_grid(grid, counts) }}</div>
+  <details class="card smpc-body"><summary><b>Full SmPC section 4.8 text</b></summary>{{ section('adverse_effects') }}</details>
+  <details class="card smpc-body"><summary><b>Special warnings and precautions (SmPC §4.4)</b></summary>{{ section('warnings') }}</details>
+</section>
+
+<section id="interactions" class="tabpanel">
+  <div class="card">
+    <h3>Key interactions used by the decision engine</h3>
+    {% if interactions %}
+    <div class="table-scroll"><table class="data">
+      <tr><th>Co-medication</th><th>Severity</th><th>What happens</th><th>Source</th></tr>
+      {% for i in interactions %}
+      <tr><td>{{ comeds[i.comed].label }}</td><td><span class="badge b-{{ i.severity }}">{{ i.severity }}</span></td>
+        <td>{{ i.message }}{% if i.dose_change %}<div class="dose small">{{ i.dose_change }}</div>{% endif %}</td>
+        <td><a class="ref" href="{{ url_for('learn.product', key=i.product) }}#s-{{ i.section }}">{{ PRODUCTS[i.product].brand }} §{{ i.section }}</a></td></tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<p class="muted">No entries in the engine's interaction table for this drug.</p>{% endif %}
+  </div>
+  <details class="card smpc-body"><summary><b>Full SmPC section 4.5 text</b></summary>{{ section('interactions') }}</details>
+</section>
+
+<section id="pregnancy" class="tabpanel"><div class="card smpc-body"><h3>Fertility, pregnancy and lactation (SmPC §4.6)</h3>{{ section('pregnancy') }}{{ source_line(doc) }}</div></section>
+
+<section id="pharmacology" class="tabpanel">
+  <details class="card smpc-body" open><summary><b>Pharmacodynamic properties (SmPC §5.1)</b></summary>{{ section('pharmacodynamics') }}</details>
+  <details class="card smpc-body"><summary><b>Pharmacokinetic properties (SmPC §5.2)</b></summary>{{ section('pharmacokinetics') }}</details>
+</section>
+
+<section id="resistance" class="tabpanel">
+  <div class="card">
+    <h3>Mutations that reduce {{ drug.name|lower }} activity</h3>
+    {% if mutations %}
+    <table class="data"><tr><th>Gene</th><th>Mutation</th><th>Penalty score</th><th>Level alone</th></tr>
+      {% for gene, m, s, lvl in mutations %}<tr><td>{{ gene }}</td><td class="mono">{{ m }}</td><td>{{ s }}</td><td><span class="lvl lvl-{{ lvl }}">{{ lvl }}</span></td></tr>{% endfor %}
+    </table>
+    {% else %}<p class="muted">No mutations in the teaching table for this drug.</p>{% endif %}
+    <p class="small muted">See the <a href="{{ url_for('learn.resistance') }}">resistance primer</a> for scoring and combinations.</p>
+  </div>
+</section>
+{% endblock %}

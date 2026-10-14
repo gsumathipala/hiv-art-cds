@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_picture, cls_badge, ref_link with context %}
+{% block title %}Regimens{% endblock %}
+{% block content %}
+<h1>Regimens and BHIVA tiers</h1>
+<p class="muted">The regimens the engine considers, how each is taken in the UK, and its tier in each clinical scenario
+  under the BHIVA adult ART guidelines (2025 interim update, Tables 5.1 and 5.2) and the BHIVA pregnancy guidelines (2025,
+  Table 8.3). Each tier links to the section it comes from. “—” means it is not offered in that scenario. Section 7 of the
+  adult guideline gives principles rather than a table for virological failure, so those tiers apply them (high-barrier
+  anchors first).</p>
+<div class="table-scroll card">
+<table class="data">
+  <tr><th>Regimen</th><th>Products</th><th>Dosing</th>{% for key, title in scenarios.items() %}<th>{{ title }}</th>{% endfor %}</tr>
+  {% for r in regimens %}
+  <tr>
+    <td><b>{{ r.short }}</b><br>{% for c in r.core_agents %}{{ cls_badge(c) }} {% endfor %}
+      {% if r.dual %}<span class="badge b-other">2-drug</span>{% endif %}{% if r.long_acting %}<span class="badge b-info">long-acting</span>{% endif %}</td>
+    <td><div class="takes">{% for k in r.products %}<div class="take">{{ product_picture(k, compact=True) }}<a href="{{ url_for('learn.product', key=k) }}">{{ PRODUCTS[k].brand }}</a></div>{% endfor %}</div></td>
+    <td class="small">{{ r.dosing }}<br><span class="muted">{{ r.food }}</span></td>
+    {% for key in scenarios %}{% set entry = tiers[key].get(r.id) %}
+      <td>{% if entry %}<span class="badge b-{{ entry[0] }}">{{ tier_labels[key][entry[0]] }}</span><br>{{ ref_link(entry[1]) }}{% else %}—{% endif %}</td>{% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

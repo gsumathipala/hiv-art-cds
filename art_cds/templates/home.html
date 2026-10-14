@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Choosing antiretroviral therapy, explained.</h1>
+    <p class="lead">A clinical decision support tool and teaching companion for HIV physicians in the UK.
+      It ranks regimens against BHIVA recommendations and the UK SmPCs, and shows every reason,
+      citation, tablet and adverse effect behind the result.</p>
+    <div class="entry-cards">
+      <a class="entry" href="{{ url_for('assess.form') }}"><b>Clinical decision support →</b>
+        Enter the patient's virology, renal and hepatic function, co-infections, co-medications and
+        preferences, and get ranked regimens with dosing, cautions and monitoring.</a>
+      <a class="entry" href="{{ url_for('learn.hub') }}"><b>Learn →</b>
+        Drug classes, pharmacology, SmPC monographs, tablet identification, interactions, resistance
+        and worked cases.</a>
+    </div>
+  </div>
+</section>
+<div class="card" style="margin-bottom:28px">
+  <h2>Where antiretrovirals act</h2>
+  {% include "_lifecycle.html" %}
+  <p class="small muted" style="margin:6px 0 0">Click a drug class to see its mechanism, drugs and UK products.</p>
+</div>
+
+<h2>Worked cases</h2>
+<div class="grid three">
+  {% for c in cases %}
+  <div class="card">
+    <h3>{{ c.title }}</h3>
+    <p class="small muted">{{ c.summary }}</p>
+    <a class="btn ghost" href="{{ url_for('assess.form', case=c.key) }}">Open this case</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

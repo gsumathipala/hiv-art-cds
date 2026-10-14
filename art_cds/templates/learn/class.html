@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ klass.name }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('learn.hub') }}">Learn</a> › {{ klass.name }}</p>
+<h1><span class="cls cls-{{ klass.code }}">{{ klass.code }}</span> {{ klass.name }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h3>Mechanism of action</h3>
+    <p>{{ klass.mechanism }}</p>
+    <h3>Genetic barrier to resistance</h3>
+    <p>{{ klass.barrier }}</p>
+  </div>
+  <div class="card">
+    <h3>Class effects to know</h3>
+    <ul>{% for e in klass.class_effects %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+</div>
+<div class="card" style="margin-top:16px">{% include "_lifecycle.html" %}
+  <p class="small muted">This class acts at the step labelled <b>{{ klass.code }}</b> ({{ klass.target|replace('-', ' ') }}).</p></div>
+<h2 style="margin-top:20px">Drugs in this class</h2>
+<div class="grid three">
+  {% for d in drugs %}
+  {% set doc = smpc_doc(d.monograph) %}
+  <a class="entry" href="{{ url_for('learn.drug', code=d.code) }}"><b>{{ d.name }} ({{ d.code }})</b>
+    <span class="small muted">{{ doc.name if doc else 'SmPC not downloaded' }}</span></a>
+  {% endfor %}
+</div>
+{% endblock %}

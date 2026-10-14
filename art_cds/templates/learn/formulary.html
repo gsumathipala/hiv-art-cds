@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_picture with context %}
+{% block title %}UK formulary{% endblock %}
+{% block content %}
+<h1>UK antiretroviral formulary</h1>
+<p class="muted">Every product as described in SmPC section 3 — colour, shape, size and debossing — drawn to the same scale so you
+  can compare and identify tablets. Combination products are grouped by their third agent.</p>
+{% set groups = [
+  ('Integrase inhibitor based', ['biktarvy','dovato','triumeq','juluca','tivicay','isentress','isentress_600','vocabria_tab','vocabria_inj','rekambys']),
+  ('NNRTI based', ['delstrigo','pifeltro','odefsey','eviplera','edurant','efv_ftc_tdf','efavirenz']),
+  ('Protease inhibitor based & boosters', ['symtuza','rezolsta','prezista','atazanavir','norvir','tybost']),
+  ('NRTI backbones & single NRTIs', ['descovy','ftc_tdf','kivexa','combivir','viread','emtriva','epivir','ziagen','retrovir']),
+  ('For multiclass resistance', ['intelence','celsentri','rukobia','sunlenca_tab','sunlenca_inj']),
+] %}
+{% for title, keys in groups %}
+<h2 style="margin-top:22px">{{ title }}</h2>
+<div class="grid four">
+  {% for k in keys if k in PRODUCTS %}{% set p = PRODUCTS[k] %}{% set doc = smpc_doc(k) %}
+  <div class="card prod">
+    <div class="pic">{{ product_picture(k, faces=1) }}</div>
+    <h3><a href="{{ url_for('learn.product', key=k) }}">{{ p.brand }}</a></h3>
+    <div>{% for c in p.ingredients %}<span class="cls cls-{{ DRUGS[c].drug_class }}" title="{{ DRUGS[c].name }}">{{ c }}</span> {% endfor %}</div>
+    <div class="small muted">{{ doc.name if doc else 'SmPC not yet downloaded' }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_picture, smpc_blocks, adverse_grid, source_line with context %}
+{% block title %}{{ product.brand }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('learn.formulary') }}">UK formulary</a> › {{ product.brand }}</p>
+<h1>{{ product.brand }}</h1>
+{% if not doc %}
+  <div class="alert warning">This SmPC has not been downloaded yet. Run <code>python -m tools.fetch_smpc {{ product.key }}</code>.</div>
+{% else %}
+<p class="muted">{{ doc.name }} · {{ doc.company }}</p>
+<div class="grid two">
+  <div class="card">
+    <div class="prod"><div class="pic">{{ product_picture(product.key) }}</div></div>
+    <p class="appearance" style="margin-top:8px"><b>SmPC §3:</b> {{ smpc_appearance(product.key) }}</p>
+    <p class="small muted">Illustration drawn to scale from the SmPC description; the 10 mm bar gives size.</p>
+  </div>
+  <div class="card">
+    <h3>Contains</h3>
+    <div>{% for c in product.ingredients %}<a class="chip" href="{{ url_for('learn.drug', code=c) }}">{{ DRUGS[c].name }} <span class="cls cls-{{ DRUGS[c].drug_class }}">{{ DRUGS[c].drug_class }}</span></a>{% endfor %}</div>
+    {% if doc.sections.composition %}<div class="smpc-body" style="margin-top:8px">{{ smpc_blocks(doc.sections.composition.blocks) }}</div>{% endif %}
+    {{ source_line(doc) }}
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px"><h3>Adverse reactions at a glance (SmPC §4.8)</h3>{{ adverse_grid(grid, counts) }}</div>
+
+<div class="report-layout" style="margin-top:16px;grid-template-columns:220px minmax(0,1fr)">
+  <nav class="toc card">
+    <b>SmPC sections</b>
+    {% for name in order if doc.sections.get(name) %}{% set s = doc.sections[name] %}
+      <a href="#s-{{ s.number }}">{{ s.title }}</a>{% endfor %}
+  </nav>
+  <div class="stack">
+    {% for name in order if doc.sections.get(name) %}{% set s = doc.sections[name] %}
+    <section class="card smpc-section" id="s-{{ s.number }}">
+      <h3>{{ s.title }}</h3>
+      <div class="smpc-body">{{ smpc_blocks(s.blocks) }}</div>
+    </section>
+    {% endfor %}
+    {{ source_line(doc) }}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

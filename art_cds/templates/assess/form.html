@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Assess a patient{% endblock %}
+{% macro v(name, default='') %}{{ values.get(name, default) }}{% endmacro %}
+{% macro sel(name, value, default=None) %}{{ 'selected' if values.get(name, default) == value }}{% endmacro %}
+{% macro chk(name, value='on') %}{{ 'checked' if value in values.getlist(name) }}{% endmacro %}
+{% macro error(name) %}{% if errors.get(name) %}<span class="err">{{ errors[name] }}</span>{% endif %}{% endmacro %}
+{% block content %}
+<h1>Assess a patient</h1>
+<p class="muted">Fields left blank are treated as unknown, and the report will tell you which results would change it.
+  Nothing you enter is stored.</p>
+<div class="case-pills"><span class="small muted" style="align-self:center">Load a teaching case:</span>
+  {% for c in cases %}<a href="{{ url_for('assess.form', case=c.key) }}">{{ c.title }}</a>{% endfor %}
+</div>
+{% if errors %}<div class="alert critical">Please correct the highlighted fields.</div>{% endif %}
+
+<form method="post" action="{{ url_for('assess.submit') }}" id="assess-form" novalidate>
+  <input type="hidden" name="case_key" value="{{ v('case_key') }}">
+  <fieldset>
+    <legend>Patient</legend>
+    <div class="fields">
+      <label class="f">Age (years) {{ error('age') }}<input type="number" name="age" min="0" max="120" required value="{{ v('age') }}"></label>
+      <label class="f">Sex registered at birth {{ error('sex') }}
+        <select name="sex" id="sex"><option value="male" {{ sel('sex','male','male') }}>Male</option><option value="female" {{ sel('sex','female') }}>Female</option></select></label>
+      <label class="f">Weight (kg) {{ error('weight_kg') }}<input type="number" step="0.1" name="weight_kg" value="{{ v('weight_kg') }}"></label>
+      <label class="f" data-show-if="sex=female">Pregnancy
+        <select name="pregnancy">
+          <option value="not_pregnant" {{ sel('pregnancy','not_pregnant') }}>Not pregnant</option>
+          <option value="planning" {{ sel('pregnancy','planning') }}>Planning conception</option>
+          <option value="pregnant" {{ sel('pregnancy','pregnant') }}>Pregnant</option></select></label>
+    </div>
+    <div class="checks" data-show-if="sex=female"><label><input type="checkbox" name="breastfeeding" {{ chk('breastfeeding') }}> Breastfeeding / chest-feeding</label></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Treatment situation</legend>
+    <div class="fields">
+      <label class="f">Scenario {{ error('status') }}
+        <select name="status" id="status">
+          <option value="naive" {{ sel('status','naive','naive') }}>ART-naive — first-line</option>
+          <option value="suppressed" {{ sel('status','suppressed') }}>Suppressed — switch / simplify</option>
+          <option value="failure" {{ sel('status','failure') }}>Virological failure</option></select></label>
+    </div>
+    <div data-show-if="status=suppressed,failure">
+      <div class="group-title">Classes in any regimen that has failed</div>
+      <div class="checks">{% for c in arv_classes %}<label><input type="checkbox" name="failed_classes" value="{{ c }}" {{ chk('failed_classes', c) }}> {{ c }}</label>{% endfor %}</div>
+    </div>
+    <div class="checks">
+      <label data-show-if="status=naive"><input type="checkbox" name="rapid_start" {{ chk('rapid_start') }}> Rapid start — begin before baseline results return</label>
+      <label><input type="checkbox" name="cab_prep_exposure" {{ chk('cab_prep_exposure') }}> Previous long-acting cabotegravir PrEP</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Virology &amp; immunology</legend>
+    <div class="fields">
+      <label class="f">HIV-1 RNA (copies/mL) {{ error('viral_load') }}<input type="number" name="viral_load" min="0" value="{{ v('viral_load') }}"></label>
+      <label class="f">CD4 count (cells/mm³) {{ error('cd4') }}<input type="number" name="cd4" min="0" value="{{ v('cd4') }}"></label>
+      <label class="f">Resistance test
+        <select name="genotype" id="genotype">
+          <option value="pending" {{ sel('genotype','pending','pending') }}>Not available / pending</option>
+          <option value="available" {{ sel('genotype','available') }}>Available</option></select></label>
+    </div>
+    <div class="fields" data-show-if="genotype=available">
+      <label class="f">Reverse transcriptase mutations <span class="hint">e.g. M184V, K65R, K103N — leave blank if none</span><input type="text" name="rt_mutations" value="{{ v('rt_mutations') }}"></label>
+      <label class="f">Protease mutations <span class="hint">e.g. I50L, I84V</span><input type="text" name="pr_mutations" value="{{ v('pr_mutations') }}"></label>
+      <label class="f">Integrase mutations <span class="hint">e.g. G140S, Q148H</span><input type="text" name="in_mutations" value="{{ v('in_mutations') }}"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Organ function &amp; co-infection</legend>
+    <div class="fields">
+      <label class="f">Creatinine clearance (mL/min) <span class="hint">Cockcroft–Gault, as used in SmPCs</span> {{ error('crcl') }}<input type="number" step="0.1" name="crcl" value="{{ v('crcl') }}"></label>
+      <label class="f">Hepatic impairment
+        <select name="child_pugh">{% for val, lab in [('none','None'),('A','Child-Pugh A (mild)'),('B','Child-Pugh B (moderate)'),('C','Child-Pugh C (severe)')] %}<option value="{{ val }}" {{ sel('child_pugh', val, 'none') }}>{{ lab }}</option>{% endfor %}</select></label>
+      <label class="f">HBsAg
+        <select name="hbsag">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('hbsag', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
+      <label class="f">HLA-B*57:01
+        <select name="hla_b5701">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('hla_b5701', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" name="on_dialysis" {{ chk('on_dialysis') }}> On chronic haemodialysis</label>
+      <label><input type="checkbox" name="hcv" {{ chk('hcv') }}> Hepatitis C viraemia</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Comorbidities</legend>
+    <div class="checks">{% for key, label in comorbidities.items() %}<label><input type="checkbox" name="comorbidities" value="{{ key }}" {{ chk('comorbidities', key) }}> {{ label }}</label>{% endfor %}</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Co-medications</legend>
+    {% for group, meds in comedication_groups.items() %}
+      <div class="group-title">{{ group }}</div>
+      <div class="checks">{% for c in meds %}<label><input type="checkbox" name="comedications" value="{{ c.key }}" {{ chk('comedications', c.key) }}> {{ c.label }}</label>{% endfor %}</div>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Patient priorities</legend>
+    <div class="checks">
+      <label><input type="checkbox" name="prefers_single_tablet" {{ chk('prefers_single_tablet') }}> Prefers a single tablet once daily</label>
+      <label><input type="checkbox" name="prefers_long_acting" {{ chk('prefers_long_acting') }}> Interested in long-acting injections</label>
+      <label><input type="checkbox" name="adherence_concerns" {{ chk('adherence_concerns') }}> Concerns about adherence</label>
+      <label><input type="checkbox" name="food_insecurity" {{ chk('food_insecurity') }}> Irregular meals / food insecurity</label>
+    </div>
+  </fieldset>
+
+  <div class="form-actions">
+    <button class="btn" type="submit">Recommend regimens</button>
+    <a class="btn ghost" href="{{ url_for('assess.form') }}">Clear</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Interactions{% endblock %}
+{% set ABBR = {'contraindicated': 'C', 'avoid': 'A', 'adjust': 'D', 'monitor': 'M'} %}
+{% block content %}
+<h1>Interaction matrix</h1>
+<p class="muted">Each coloured cell is an interaction in the engine's table, taken from SmPC §4.3 or §4.5 of the named UK product and
+  checked against its text. A blank cell means “not in this table”, <b>not</b> “no interaction” — always check the
+  <a href="https://www.hiv-druginteractions.org" target="_blank" rel="noopener">Liverpool HIV interaction checker</a>.</p>
+<div class="freq-legend">
+  <span style="--c: var(--bad)">C — contraindicated</span><span style="--c:#e07a1f">A — avoid / not recommended</span>
+  <span style="--c:#e6b422">D — dose or timing adjustment</span><span style="--c:#79a7d8">M — monitor</span>
+</div>
+<div class="card table-scroll">
+<table class="matrix">
+  <tr><th></th>{% for d in drugs %}<th class="rot"><div><a href="{{ url_for('learn.drug', code=d) }}">{{ DRUGS[d].name }}</a></div></th>{% endfor %}</tr>
+  {% for c in comeds %}
+  <tr><th class="rowh">{{ c.label }}</th>
+    {% for d in drugs %}{% set i = cells.get((c.key, d)) %}
+      {% if i %}<td class="{{ i.severity }}" title="{{ i.message }} ({{ PRODUCTS[i.product].brand }} SmPC §{{ i.section }})"><a href="#ix-{{ c.key }}-{{ d }}">{{ ABBR[i.severity] }}</a></td>
+      {% else %}<td></td>{% endif %}
+    {% endfor %}</tr>
+  {% endfor %}
+</table>
+</div>
+<h2 style="margin-top:22px">Details</h2>
+<div class="card table-scroll">
+<table class="data">
+  <tr><th>Co-medication</th><th>Antiretroviral</th><th>Severity</th><th>Effect and management</th><th>Source</th></tr>
+  {% for i in interactions %}
+  <tr id="ix-{{ i.comed }}-{{ i.drug }}"><td>{{ comeds|selectattr('key','equalto',i.comed)|map(attribute='label')|first }}</td>
+    <td>{{ DRUGS[i.drug].name }}</td><td><span class="badge b-{{ i.severity }}">{{ i.severity }}</span></td>
+    <td>{{ i.message }}{% if i.dose_change %}<div class="dose small">{{ i.dose_change }}</div>{% endif %}{% if i.oral_only %}<div class="small muted">Applies to oral dosing only.</div>{% endif %}</td>
+    <td><a class="ref" href="{{ url_for('learn.product', key=i.product) }}#s-{{ i.section }}">{{ PRODUCTS[i.product].brand }} §{{ i.section }}</a></td></tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}
