@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Pharmacokinetics{% endblock %}
+{% block content %}
+<h1>Concentration–time curves</h1>
+<p class="muted">Illustrative one-compartment curves built from the half-life and Tmax quoted in each SmPC §5.2. They show
+  the <i>shape</i> of accumulation, trough cover and washout — not predicted concentrations for any individual.</p>
+<form method="get" class="card">
+  <div class="row">
+    <label class="f" style="min-width:320px">Drug
+      <select name="drug" onchange="this.form.submit()">
+        {% for p in profiles %}<option value="{{ p.code }}" {{ 'selected' if p.code == profile.code }}>{{ p.name }}</option>{% endfor %}
+      </select></label>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:18px">
+      <input type="checkbox" name="stop" {{ 'checked' if stop }} onchange="this.form.submit()"> Stop dosing after 2 doses (show the tail)</label>
+  </div>
+  <noscript><button class="btn">Update</button></noscript>
+  <div class="table-scroll" style="margin-top:10px">{{ svg|safe }}</div>
+  <p class="small"><b>{{ profile.name }}</b> — {{ profile.note }}</p>
+</form>
+<div class="card" style="margin-top:16px">
+  <h3>Boosters and inducers</h3>
+  <p>{{ explainer }}</p>
+  <p class="small muted">Half-lives and Tmax are taken from SmPC section 5.2 of each product and verified against that
+    text by <code>tools/verify_smpc.py</code>.</p>
+</div>
+{% endblock %}

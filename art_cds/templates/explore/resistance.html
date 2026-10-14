@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Resistance explorer{% endblock %}
+{% block content %}
+<h1>Resistance explorer</h1>
+<p class="muted">Add mutations and watch predicted drug activity change. Scores are the local teaching approximation of
+  the Stanford HIVdb approach — use the laboratory report or <a href="https://hivdb.stanford.edu" target="_blank" rel="noopener">Stanford HIVdb</a> clinically.</p>
+<form method="get" class="card">
+  <div class="fields">
+    {% for gene, label in [('RT', 'Reverse transcriptase'), ('PR', 'Protease'), ('IN', 'Integrase')] %}
+    <label class="f">{{ label }}<input type="text" name="{{ gene|lower }}" value="{{ chosen[gene] }}" placeholder="e.g. M184V K65R"></label>
+    {% endfor %}
+  </div>
+  <button class="btn">Update</button>
+  <a class="btn ghost" href="{{ url_for('explore.resistance') }}">Clear</a>
+  {% for gene in ['RT', 'PR', 'IN'] %}
+  <div class="group-title">{{ gene }} — click to add</div>
+  <div class="case-pills">
+    {% for m in common[gene] %}
+    {% set already = m in chosen[gene] %}
+    <a href="{{ url_for('explore.resistance', rt=(chosen['RT'] ~ (' ' ~ m if gene == 'RT' and not already else '')), pr=(chosen['PR'] ~ (' ' ~ m if gene == 'PR' and not already else '')), **{'in': (chosen['IN'] ~ (' ' ~ m if gene == 'IN' and not already else ''))}) }}"
+       class="mono" style="{{ 'border-color:var(--brand-2);font-weight:700' if already }}">{{ m }}</a>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</form>
+
+<div class="grid two" style="margin-top:16px">
+  <div class="card">
+    <h3>Predicted activity</h3>
+    <table class="data">
+      <tr><th>Drug</th><th>Score</th><th>Interpretation</th><th>GSS</th></tr>
+      {% for code in drugs %}{% set s = report.get(code) %}
+      <tr><td>{{ DRUGS[code].name }} <span class="cls cls-{{ DRUGS[code].drug_class }}">{{ code }}</span></td>
+        <td class="mono">{{ s.score|int }}</td>
+        <td><span class="lvl lvl-{{ s.level }}">{{ s.label }}</span></td>
+        <td>{{ '%.2f'|format(s.activity) }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h3>What these mutations do</h3>
+    {% set shown = [] %}
+    {% for gene, muts in report.mutations.items() %}{% for m in muts %}
+      {% if notes.get(m) %}{% set _ = shown.append(m) %}<p class="small"><b class="mono">{{ m }}</b> — {{ notes[m] }}</p>{% endif %}
+    {% endfor %}{% endfor %}
+    {% if not shown %}<p class="muted small">Add a mutation to see its teaching note. Notes are available for the
+      signature mutations.</p>{% endif %}
+    {% if report.unrecognised %}<p class="small err">Not valid notation: {{ report.unrecognised|join(', ') }}</p>{% endif %}
+    {% if report.not_in_local_table %}<p class="small muted">Not in the teaching table: {{ report.not_in_local_table|join(', ') }}</p>{% endif %}
+    <p class="small muted" style="margin-top:10px">A genotypic susceptibility score (GSS) of 1.0 means fully active,
+      0 means no activity. After failure, aim for at least two fully active drugs or a fully active high-barrier anchor.</p>
+  </div>
+</div>
+{% endblock %}
