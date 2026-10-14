@@ -86,6 +86,17 @@ def cases():
     return render_template("learn/cases.html", cases=CASES)
 
 
+@bp.get("/governance")
+def governance():
+    from ..safety import HAZARDS, LIKELIHOOD, MATRIX, RISK_LABEL, SEVERITY
+    from ..verification import check
+
+    failures, missing, total = check()
+    return render_template("learn/governance.html", hazards=HAZARDS, risk_label=RISK_LABEL, severity=SEVERITY,
+                           likelihood=LIKELIHOOD, matrix=MATRIX, claims_total=total, claims_failed=failures,
+                           claims_missing=missing)
+
+
 @bp.get("/about")
 def about():
     docs = [(p, smpc.load(p.key)) for p in PRODUCTS]

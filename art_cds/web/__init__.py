@@ -4,6 +4,7 @@ from __future__ import annotations
 from flask import Flask
 
 from .. import __version__
+from ..governance import knowledge_base_version
 from ..knowledge import smpc
 from ..knowledge.drugs import CLASSES, DRUGS
 from ..knowledge.guidelines import TIER_LABEL
@@ -24,6 +25,8 @@ def register(app: Flask) -> None:
     def globals_():
         return {
             "app_version": __version__,
+            "kb_version": knowledge_base_version(),
+            "mode": app.config.get("MODE", "education"),
             "DRUGS": DRUGS,
             "CLASSES": CLASSES,
             "PRODUCTS": PRODUCTS_BY_KEY,

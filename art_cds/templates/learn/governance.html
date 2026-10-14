@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Clinical safety{% endblock %}
+{% block content %}
+<h1>Clinical safety and governance</h1>
+<div class="grid two">
+  <div class="card">
+    <h3>Operating mode: {{ mode }}</h3>
+    {% if mode == 'clinical' %}
+      <p>Clinical mode is enabled. This should only be the case once the organisation's DCB0129/DCB0160 safety case is
+        approved and the regulatory position is settled.</p>
+    {% else %}
+      <p><b>Education mode.</b> Software that recommends treatment for an individual patient is likely to be a medical
+        device under the UK Medical Devices Regulations 2002. This build has no UKCA marking and no approved clinical safety
+        case, so it is provided for teaching and for exploring the evidence — not for individual patient decisions.</p>
+    {% endif %}
+    <p class="small">See <code>docs/clinical-safety/README.md</code> for intended use, the regulatory position, DCB0129/DCB0160
+      responsibilities and the safety-case template.</p>
+  </div>
+  <div class="card">
+    <h3>Traceability</h3>
+    <dl class="small" style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0">
+      <dt>App version</dt><dd>{{ app_version }}</dd>
+      <dt>Knowledge base</dt><dd class="mono">{{ kb_version }}</dd>
+      <dt>Source verification</dt>
+      <dd>{% if not claims_failed and not claims_missing %}<span class="badge b-preferred">{{ claims_total }}/{{ claims_total }} SmPC and BHIVA claims verified</span>
+        {% else %}<span class="badge b-exclude">{{ claims_failed|length }} failed, {{ claims_missing|length }} missing of {{ claims_total }}</span>
+        <ul>{% for f in claims_failed + claims_missing %}<li class="mono">{{ f }}</li>{% endfor %}</ul>{% endif %}</dd>
+      <dt>Audit trail</dt><dd>One JSON line per recommendation (input hash only by default).</dd>
+    </dl>
+  </div>
+</div>
+
+<h2 style="margin-top:20px">Hazard log</h2>
+<p class="small muted">Initial developer assessment using the DCB0129 risk matrix (residual risk after controls). To be reviewed
+  and owned by a Clinical Safety Officer.</p>
+<div class="card table-scroll">
+<table class="data">
+  <tr><th>ID</th><th>Hazard</th><th>Cause</th><th>Effect</th><th>Controls</th><th>Severity</th><th>Likelihood</th><th>Risk</th></tr>
+  {% for h in hazards %}
+  <tr><td class="mono">{{ h.id }}</td><td><b>{{ h.hazard }}</b></td><td class="small">{{ h.cause }}</td><td class="small">{{ h.effect }}</td>
+    <td class="small"><ul style="margin:0;padding-left:16px">{% for c in h.controls %}<li>{{ c }}</li>{% endfor %}</ul></td>
+    <td>{{ h.severity }}</td><td>{{ h.likelihood }}</td>
+    <td><span class="lvl lvl-{{ h.risk }}" title="{{ risk_label[h.risk] }}">{{ h.risk }}</span></td></tr>
+  {% endfor %}
+</table>
+</div>
+
+<h3 style="margin-top:20px">DCB0129 risk matrix</h3>
+<div class="card table-scroll">
+<table class="data" style="max-width:640px">
+  <tr><th>Likelihood \ Severity</th>{% for s in severity %}<th>{{ s }}</th>{% endfor %}</tr>
+  {% for row in matrix|reverse %}{% set li = likelihood|length - loop.index %}
+  <tr><th>{{ likelihood[li] }}</th>{% for r in row %}<td><span class="lvl lvl-{{ r }}">{{ r }}</span></td>{% endfor %}</tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

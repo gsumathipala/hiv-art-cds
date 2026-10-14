@@ -2,7 +2,7 @@
 from art_cds.knowledge import smpc
 from art_cds.knowledge.products import PRODUCTS
 from art_cds.visuals import pills
-from tools.verify_smpc import check
+from art_cds.verification import check
 
 from .conftest import needs_smpc
 

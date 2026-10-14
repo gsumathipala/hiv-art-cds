@@ -1,9 +1,12 @@
 """The decision-support pages: patient form and recommendation report."""
 from __future__ import annotations
 
-from flask import Blueprint, abort, render_template, request
+from pathlib import Path
+
+from flask import Blueprint, abort, current_app, render_template, request
 from werkzeug.datastructures import MultiDict
 
+from .. import __version__, governance
 from ..engine.recommender import recommend
 from ..knowledge.cases import CASES, CASES_BY_KEY
 from ..knowledge.conditions import COMORBIDITIES
@@ -55,8 +58,18 @@ def submit():
     if errors:
         return render_template("assess/form.html", **_form_context(request.form, errors)), 422
     report = recommend(patient)
+    audit_ref = _audit(report)
     case = CASES_BY_KEY.get(request.form.get("case_key", ""))
     p = report.patient
     chart = timeline.render(p.vl_history, p.cd4_history, p.art_history,
                             report.virology.labels if report.virology else ())
-    return render_template("assess/report.html", report=report, values=request.form, case=case, timeline=chart)
+    return render_template("assess/report.html", report=report, values=request.form, case=case, timeline=chart,
+                           audit_ref=audit_ref)
+
+
+def _audit(report):
+    cfg = current_app.config
+    if not cfg.get("AUDIT"):
+        return None
+    return governance.audit(report, cfg.get("MODE", "education"), __version__, Path(cfg["AUDIT_DIR"]),
+                            cfg.get("AUDIT_STORE_INPUTS", False))

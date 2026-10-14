@@ -30,6 +30,10 @@
   </header>
   <main>
     <div class="wrap">
+      {% if mode != 'clinical' %}
+      <div class="banner edu"><b>Education mode — not a medical device.</b> For teaching and for exploring the
+        evidence; not for making decisions about individual patients. <a href="{{ url_for('learn.governance') }}">Why?</a></div>
+      {% endif %}
       <div class="banner no-print"><b>For use by HIV clinicians.</b> This tool supports clinical judgement and teaching; it
         does not replace it. Check the current SmPC, BHIVA guidance and the
         <a href="https://www.hiv-druginteractions.org" target="_blank" rel="noopener">Liverpool HIV interaction checker</a>
@@ -39,7 +43,8 @@
   </main>
   <footer>
     <div class="wrap">
-      ART Navigator v{{ app_version }} · Product information is reproduced from UK Summaries of Product Characteristics
+      ART Navigator v{{ app_version }} · knowledge base {{ kb_version }} · {{ mode }} mode ·
+      <a href="{{ url_for('learn.governance') }}">clinical safety</a> · Product information is reproduced from UK Summaries of Product Characteristics
       on the <a href="https://www.medicines.org.uk/emc" target="_blank" rel="noopener">electronic medicines compendium (emc)</a>;
       each page states the SmPC version used. Regimen tiers follow the BHIVA adult ART guidelines (2025 interim update) and BHIVA pregnancy guidelines (2025).
       Tablet illustrations are drawn from SmPC section 3 descriptions, not photographs.

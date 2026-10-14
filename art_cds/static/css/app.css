@@ -71,6 +71,7 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-
 main { padding: 24px 0 48px; }
 .banner { background: var(--warn-bg); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
   border-radius: var(--radius); padding: 10px 14px; margin-bottom: 18px; font-size: .9rem; }
+.banner.edu { background: var(--info-bg); color: var(--info); border-color: color-mix(in srgb, var(--info) 30%, transparent); }
 footer { border-top: 1px solid var(--line); padding: 22px 0 40px; color: var(--ink-2); font-size: .85rem; }
 
 /* cards & grid */

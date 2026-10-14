@@ -9,8 +9,10 @@
       {% if f.teaching %}<div class="teach">{{ f.teaching }}</div>{% endif %}</div></li>
 {% endmacro %}
 {% block content %}
-<div class="row no-print" style="margin-bottom:10px">
-  <h1 style="margin:0">Regimen recommendation</h1><span class="spacer"></span>
+<div class="row" style="margin-bottom:10px">
+  <h1 style="margin:0">Regimen recommendation</h1>
+  {% if mode != 'clinical' %}<span class="badge b-caution">EDUCATIONAL — not for individual patient decisions</span>{% endif %}
+  <span class="spacer"></span>
   <a class="btn ghost" href="javascript:history.back()">← Edit inputs</a>
   <button class="btn ghost" onclick="window.print()">Print</button>
 </div>
@@ -129,6 +131,15 @@
         <a href="{{ url_for('learn.resistance') }}">How this works</a></p>
     </div>
     {% endif %}
+    <div class="card small">
+      <h3>Traceability</h3>
+      <dl class="small" style="display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0">
+        <dt>App</dt><dd>v{{ app_version }} ({{ mode }} mode)</dd>
+        <dt>Knowledge base</dt><dd class="mono">{{ kb_version }}</dd>
+        {% if report.resistance %}<dt>Resistance</dt><dd>{{ report.resistance.version }}</dd>{% endif %}
+        {% if audit_ref %}<dt>Audit ref</dt><dd class="mono">{{ audit_ref }}</dd>{% endif %}
+      </dl>
+    </div>
     <div class="card small">
       <h3>How the ranking works</h3>
       <p>Each regimen starts from its BHIVA tier (top tier 100, second 80, third 60). Rule modules then add or
