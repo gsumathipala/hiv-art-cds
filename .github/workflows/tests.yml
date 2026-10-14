@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Download UK SmPCs and BHIVA guidelines
+        run: |
+          python -m tools.fetch_guidelines
+          python -m tools.fetch_smpc --delay 20
+      - name: Verify every SmPC and guideline claim
+        run: python -m tools.verify_smpc
+      - run: python -m pytest -q

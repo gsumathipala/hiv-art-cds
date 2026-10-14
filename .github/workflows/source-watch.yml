@@ -1,0 +1,22 @@
+name: source watch
+
+# Re-fetches the UK SmPCs weekly and fails if any has been revised or if any claim
+# no longer matches its source text, so a new contraindication cannot go unnoticed.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m tools.fetch_guidelines
+      - run: python -m tools.fetch_smpc --delay 20
+      - name: Check for revised SmPCs and re-verify claims
+        run: python -m tools.check_updates --quick

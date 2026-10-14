@@ -26,8 +26,26 @@
         {% else %}<span class="badge b-exclude">{{ claims_failed|length }} failed, {{ claims_missing|length }} missing of {{ claims_total }}</span>
         <ul>{% for f in claims_failed + claims_missing %}<li class="mono">{{ f }}</li>{% endfor %}</ul>{% endif %}</dd>
       <dt>Audit trail</dt><dd>One JSON line per recommendation (input hash only by default).</dd>
+      <dt>Source freshness</dt>
+      <dd>{% set stale = docs|selectattr(2, 'ge', 180)|list %}
+        {% if stale %}<span class="badge b-caution">{{ stale|length }} of {{ docs|length }} SmPCs downloaded over 180 days ago</span>
+        {% else %}<span class="badge b-preferred">all {{ docs|length }} SmPCs downloaded within 180 days</span>{% endif %}
+        <div class="small muted">Run <code>python -m tools.check_updates</code> to re-fetch and diff them.</div></dd>
     </dl>
   </div>
+</div>
+
+<h2 style="margin-top:20px">Source freshness</h2>
+<div class="card table-scroll">
+<table class="data">
+  <tr><th>Product</th><th>SmPC revised</th><th>Downloaded</th><th>Age (days)</th></tr>
+  {% for p, doc, age in docs[:10] %}
+  <tr><td><a href="{{ url_for('learn.product', key=p.key) }}">{{ p.brand }}</a></td><td>{{ doc.revision }}</td>
+    <td>{{ doc.retrieved }}</td><td>{% if age is not none %}<span class="lvl lvl-{{ 4 if age >= 180 else 1 }}">{{ age }}</span>{% endif %}</td></tr>
+  {% endfor %}
+</table>
+<p class="small muted">The ten oldest downloads. A weekly GitHub Actions job re-fetches every SmPC and fails if one has
+  been revised or a claim no longer matches its source.</p>
 </div>
 
 <h2 style="margin-top:20px">Hazard log</h2>

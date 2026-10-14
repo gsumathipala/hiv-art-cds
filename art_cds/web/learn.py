@@ -91,10 +91,20 @@ def governance():
     from ..safety import HAZARDS, LIKELIHOOD, MATRIX, RISK_LABEL, SEVERITY
     from ..verification import check
 
+    from datetime import date
+
     failures, missing, total = check()
+    docs = []
+    for p in PRODUCTS:
+        doc = smpc.load(p.key)
+        if doc:
+            retrieved = doc.get("retrieved", "")
+            age = (date.today() - date.fromisoformat(retrieved)).days if retrieved else None
+            docs.append((p, doc, age))
+    docs.sort(key=lambda d: d[2] or 0, reverse=True)
     return render_template("learn/governance.html", hazards=HAZARDS, risk_label=RISK_LABEL, severity=SEVERITY,
                            likelihood=LIKELIHOOD, matrix=MATRIX, claims_total=total, claims_failed=failures,
-                           claims_missing=missing)
+                           claims_missing=missing, docs=docs)
 
 
 @bp.get("/about")
