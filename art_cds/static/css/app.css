@@ -282,3 +282,10 @@ table.data th { background: var(--surface-2); font-weight: 700; }
 
 /* pharmacokinetic curves */
 .pk-curve { width: 100%; min-width: 560px; height: auto; display: block; }
+
+/* printable outputs */
+.letter, .leaflet { max-width: 760px; }
+.letter h2, .leaflet h2 { margin-top: 0; }
+.leaflet { font-size: 1.02rem; line-height: 1.6; }
+.leaflet .takes { margin: 10px 0; }
+@media print { .letter, .leaflet { border: 0; max-width: none; } }

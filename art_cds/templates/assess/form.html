@@ -8,6 +8,19 @@
 <h1>Assess a patient</h1>
 <p class="muted">Fields left blank are treated as unknown, and the report will tell you which results would change it.
   Nothing you enter is stored.</p>
+{% for level, msg in (import_notes or []) %}<div class="alert {{ 'warning' if level == 'warning' else 'info' }}">{{ msg }}</div>{% endfor %}
+<details class="card" style="margin-bottom:14px"><summary><b>Import a FHIR bundle</b> — pre-fill from a trust record extract</summary>
+  <form method="post" action="{{ url_for('assess.import_fhir') }}" enctype="multipart/form-data" style="margin-top:10px">
+    {{ error('bundle') }}
+    <div class="fields">
+      <label class="f">FHIR R4 Bundle (.json)<input type="file" name="bundle" accept=".json,application/json,application/fhir+json"></label>
+    </div>
+    <label class="f">…or paste the JSON<textarea name="bundle_text" rows="3" class="mono"></textarea></label>
+    <button class="btn ghost" style="margin-top:8px">Import</button>
+    <p class="small muted">Read only — nothing is written back and no identifiers are kept. Observations, conditions and
+      medicines are imported; HLA-B*57:01, genotypes and ART history are not and must be entered by hand.</p>
+  </form>
+</details>
 <div class="case-pills"><span class="small muted" style="align-self:center">Load a teaching case:</span>
   {% for c in cases %}<a href="{{ url_for('assess.form', case=c.key) }}">{{ c.title }}</a>{% endfor %}
 </div>
@@ -205,6 +218,8 @@
 
   <div class="form-actions">
     <button class="btn" type="submit">Recommend regimens</button>
+    <button class="btn ghost" type="submit" formaction="{{ url_for('assess.letter') }}">Clinic letter</button>
+    <button class="btn ghost" type="submit" formaction="{{ url_for('assess.leaflet') }}">Patient leaflet</button>
     <a class="btn ghost" href="{{ url_for('assess.form') }}">Clear</a>
     <button class="btn ghost" type="button" id="save-case" title="Download everything entered as a file on this computer">Save case to file</button>
     <label class="btn ghost" title="Reload a case saved earlier">Load case file<input type="file" id="load-case" accept=".json,application/json" hidden></label>

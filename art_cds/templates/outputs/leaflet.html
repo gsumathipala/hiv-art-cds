@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_picture with context %}
+{% block title %}Patient leaflet{% endblock %}
+{% set p = report.patient %}
+{% set top = report.top %}
+{% block content %}
+<div class="row no-print" style="margin-bottom:10px">
+  <h1 style="margin:0">Information for you</h1><span class="spacer"></span>
+  <button class="btn ghost" onclick="window.print()">Print or save as PDF</button>
+</div>
+<div class="alert warning no-print">Draft leaflet — check it with the patient and your pharmacy team before giving it out.</div>
+{% if top %}
+<div class="card leaflet">
+  <h2>Your HIV treatment</h2>
+  <p class="lead">Your doctor has suggested <b>{{ top.regimen.short }}</b>. Here is what you would take and what to expect.</p>
+
+  <h3>What you take</h3>
+  <div class="takes">
+    {% for key in top.regimen.products %}
+    <div class="take">{{ product_picture(key, compact=True) }}
+      <div><b>{{ PRODUCTS[key].brand }}</b></div></div>
+    {% endfor %}
+  </div>
+  <p><b>How to take it:</b> {{ top.regimen.dosing }}.<br>
+    <b>Food:</b> {{ top.regimen.food }}.</p>
+  <p class="small muted">The pictures are drawings based on the official description of each tablet, so you can recognise
+    them. Colours on a screen or printer may differ slightly from the real tablet.</p>
+
+  <h3>Why this treatment</h3>
+  <ul>
+    {% for f in top.findings if f.severity.value == 'benefit' %}<li>{{ f.message }}</li>{% endfor %}
+    <li>Taking it every day keeps the virus under control, protects your immune system, and means you cannot pass HIV on
+      to a sexual partner.</li>
+  </ul>
+
+  {% if side_effects %}
+  <h3>Possible side effects</h3>
+  <p class="small">From the official product information. Most people have few or none, and early effects often settle.</p>
+  <ul>
+    {% for freq, items in side_effects %}
+    <li><b>{{ freq|capitalize }}:</b> {{ items|join(', ') }}</li>
+    {% endfor %}
+  </ul>
+  <p><b>Tell your clinic straight away</b> if you have a rash with fever, yellowing of the eyes or skin, severe tummy
+    pain, or any new symptom that worries you.</p>
+  {% endif %}
+
+  <h3>Other medicines</h3>
+  <p>Some medicines, including ones you can buy without a prescription, can stop HIV treatment working. Always check
+    with your HIV clinic or pharmacist before starting anything new — including indigestion remedies, vitamins, iron or
+    calcium supplements, and herbal products such as St John's wort.</p>
+
+  <h3>Questions to ask</h3>
+  <ul>
+    <li>What should I do if I miss a dose?</li>
+    <li>When is my next blood test?</li>
+    <li>Who do I contact if I feel unwell?</li>
+  </ul>
+</div>
+{% else %}
+<div class="card"><p>No regimen was recommended, so there is no leaflet to produce.</p></div>
+{% endif %}
+{% endblock %}

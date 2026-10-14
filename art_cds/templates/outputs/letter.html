@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ref_link with context %}
+{% block title %}Clinic letter{% endblock %}
+{% set p = report.patient %}
+{% set top = report.top %}
+{% block content %}
+<div class="row no-print" style="margin-bottom:10px">
+  <h1 style="margin:0">Clinic letter / GP summary</h1><span class="spacer"></span>
+  <button class="btn ghost" onclick="window.print()">Print or save as PDF</button>
+  <a class="btn ghost" href="{{ url_for('assess.form') }}">New assessment</a>
+</div>
+<div class="alert warning no-print">Draft for the clinician to check and edit. No patient identifiers are stored by this
+  tool — add them in your own record system.</div>
+<div class="card letter">
+  <p class="small muted">Date: {{ today }} · ART Navigator v{{ app_version }} ({{ mode }} mode) · knowledge base
+    {{ kb_version }}{% if audit_ref %} · audit {{ audit_ref }}{% endif %}</p>
+  <h2>Antiretroviral therapy review</h2>
+  <p><b>Summary.</b> {{ p.age }}-year-old {{ p.sex }}{% if p.virus_type != 'HIV-1' %} with {{ p.virus_type }}{% endif %},
+    {{ p.status.label|lower }}.
+    {% if p.viral_load is not none %}HIV RNA {{ '{:,}'.format(p.viral_load) }} copies/mL{% endif %}{% if p.cd4 is not none %},
+    CD4 {{ p.cd4 }} cells/mm³{% endif %}.
+    {% if p.crcl is not none %}Creatinine clearance {{ p.crcl|round|int }} mL/min.{% endif %}
+    HBsAg {{ p.hbsag.value }}; HLA-B*57:01 {{ p.hla_b5701.value }}.
+    {% if report.virology %}Viral-load course: {{ report.virology.status }}.{% endif %}</p>
+
+  {% if top %}
+  <p><b>Recommended regimen.</b> {{ top.regimen.short }} — {{ top.regimen.dosing }} ({{ top.regimen.food|lower }}).
+    This is {{ top.tier_label|lower }} in the current BHIVA guidance for this situation.</p>
+  {% if top.dose_changes %}<p><b>Dose adjustments.</b> {% for d in top.dose_changes %}{{ d }}{{ '; ' if not loop.last }}{% endfor %}.</p>{% endif %}
+  <p><b>Why.</b></p>
+  <ul>
+    {% for f in top.findings if f.severity.value in ('benefit', 'caution') %}
+    <li>{{ f.message }}{% if f.refs %} <span class="small muted">[{% for r in f.refs %}{{ r.label() }}{{ '; ' if not loop.last }}{% endfor %}]</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% if report.recommended|length > 1 %}
+  <p><b>Alternatives considered.</b>
+    {% for a in report.recommended[1:4] %}{{ a.regimen.short }}{{ ', ' if not loop.last }}{% endfor %}.</p>
+  {% endif %}
+  {% if top.monitoring %}
+  <p><b>Monitoring plan.</b></p>
+  <ul>{% for m in top.monitoring %}<li>{{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% else %}
+  <p><b>No regimen in this tool met all the constraints</b> — see the alerts below and discuss at the HIV MDT.</p>
+  {% endif %}
+
+  {% set actions = report.alerts|selectattr('level', 'in', ['critical', 'warning'])|list %}
+  {% if actions %}
+  <p><b>Actions and cautions.</b></p>
+  <ul>{% for a in actions %}<li>{{ a.message }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  {% if report.resistance and report.resistance.any_mutations %}
+  <p><b>Resistance.</b> {% for g, muts in report.resistance.mutations.items() if muts %}{{ g }}: {{ muts|join(', ') }}. {% endfor %}
+    Interpreted with {{ report.resistance.version }}{% if top and top.gss is not none %}; genotypic susceptibility score for the
+    recommended regimen {{ top.gss }}{% endif %}.</p>
+  {% endif %}
+
+  <p class="small muted" style="margin-top:18px">Prepared with ART Navigator UK, which ranks regimens against BHIVA
+    guidance and the UK Summaries of Product Characteristics. The recommendation supports, and does not replace, the
+    clinician's judgement.</p>
+</div>
+{% endblock %}
