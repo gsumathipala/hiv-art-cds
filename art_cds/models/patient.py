@@ -70,6 +70,36 @@ class GenotypeTest:
 
 
 @dataclass(frozen=True)
+class LabValue:
+    """A dated result. ``censored`` marks a below-limit result such as '<50' (value = the limit)."""
+
+    date: str
+    value: float
+    censored: bool = False
+
+    @property
+    def display(self) -> str:
+        return f"<{self.value:g}" if self.censored else f"{self.value:,.0f}"
+
+
+STOP_REASONS = ("", "virological failure", "toxicity/intolerance", "simplification", "drug interaction",
+                "pregnancy", "patient choice", "other")
+
+
+@dataclass(frozen=True)
+class ArtEpisode:
+    start: str
+    stop: str = ""  # blank = current
+    regimen: str = ""  # regimen id from knowledge/regimens.py, or free text
+    components: Tuple[str, ...] = ()  # drug codes
+    reason_stopped: str = ""
+
+    @property
+    def current(self) -> bool:
+        return not self.stop
+
+
+@dataclass(frozen=True)
 class PatientProfile:
     age: int
     sex: str = "male"  # sex registered at birth: male | female
@@ -103,6 +133,10 @@ class PatientProfile:
 
     comorbidities: FrozenSet[str] = frozenset()
     comedications: FrozenSet[str] = frozenset()
+
+    vl_history: Tuple[LabValue, ...] = ()  # sorted by date
+    cd4_history: Tuple[LabValue, ...] = ()
+    art_history: Tuple[ArtEpisode, ...] = ()
 
     prefers_single_tablet: bool = False
     prefers_long_acting: bool = False

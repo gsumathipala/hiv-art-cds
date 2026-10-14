@@ -121,6 +121,14 @@ def history(regimen, ctx):
                                    "historical genotypes — archived resistance may be present.", -25,
                                    refs=(LOW_BARRIER_SWITCH,)))
 
+    vir = ctx.virology
+    if vir is not None and vir.concerning and p.status is not TreatmentStatus.NAIVE:
+        from ..virology import LLV
+        if regimen.anchor in LOW_BARRIER or (regimen.dual and p.status is TreatmentStatus.SUPPRESSED):
+            out.append(finding("history", Severity.CAUTION,
+                               "Low-level viraemia or repeated blips on record — BHIVA recommends a high genetic-barrier "
+                               "regimen.", -20, refs=(LLV,)))
+
     if p.status is TreatmentStatus.FAILURE:
         if regimen.dual and regimen.id != "drvr_dtg":
             out.append(finding("history", Severity.EXCLUDE,

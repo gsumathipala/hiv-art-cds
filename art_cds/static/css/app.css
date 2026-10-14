@@ -245,6 +245,10 @@ table.data th { background: var(--surface-2); font-weight: 700; }
 .matrix td a { color: inherit; text-decoration: none; display: block; font-weight: 800; }
 .matrix th.rowh { text-align: right; white-space: nowrap; }
 
+/* timeline */
+.timeline { width: 100%; min-width: 640px; height: auto; display: block; }
+.art-table input, .art-table select { min-width: 120px; }
+
 /* life-cycle diagram */
 .lifecycle { width: 100%; height: auto; }
 .lifecycle .step text { font-size: 12px; fill: var(--ink); }

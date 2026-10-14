@@ -26,6 +26,13 @@
 </div>
 {% endif %}
 
+{% if timeline %}
+<div class="card" style="margin:12px 0">
+  <div class="row"><h3 style="margin:0">Course on treatment</h3>
+    {% if report.virology %}<span class="badge {{ 'b-exclude' if 'failure' in report.virology.status else 'b-caution' if report.virology.concerning else 'b-preferred' }}">{{ report.virology.status }}</span>{% endif %}</div>
+  <div class="table-scroll">{{ timeline|safe }}</div>
+</div>
+{% endif %}
 <div class="report-layout" style="margin-top:14px">
   <div>
     {% set best = report.top.score if report.top else 100 %}

@@ -125,6 +125,7 @@ class Report:
     excluded: List[RegimenAssessment]
     alerts: List[Alert]
     resistance: Optional["ResistanceReport"]
+    virology: Optional[Any] = None  # engine.virology.VirologyAssessment
 
     @property
     def top(self) -> Optional[RegimenAssessment]:
@@ -136,4 +137,6 @@ class Report:
             "recommended": [a.to_dict() for a in self.recommended],
             "excluded": [a.to_dict() for a in self.excluded],
             "resistance": self.resistance.to_dict() if self.resistance else None,
+            "virology": {"status": self.virology.status, "message": self.virology.message,
+                         "blips": self.virology.blips} if self.virology else None,
         }

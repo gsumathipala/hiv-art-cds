@@ -20,6 +20,7 @@ from ..resistance import ResistanceReport
 class RuleContext:
     patient: PatientProfile
     resistance: Optional[ResistanceReport]
+    virology: Optional["object"] = None  # engine.virology.VirologyAssessment
 
 
 RuleFn = Callable[["object", RuleContext], List[Finding]]

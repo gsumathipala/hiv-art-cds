@@ -1,15 +1,18 @@
 """Orchestrate the decision: candidate regimens -> rules -> ranked report."""
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import List, Optional
 
 from ..knowledge.guidelines import TIER_SCORE, tier_for
 from ..knowledge.regimens import REGIMENS, Regimen
-from ..models import PatientProfile, RegimenAssessment, Report
+from ..knowledge.drugs import class_of
+from ..models import PatientProfile, RegimenAssessment, Report, TreatmentStatus
 from . import rules
 from .alerts import patient_alerts
 from .monitoring import monitoring_plan
 from .resistance import ResistanceReport, interpret_history, regimen_gss
+from .virology import classify, latest
 
 
 def assess_regimen(regimen: Regimen, tier: str, ctx: rules.RuleContext, label: str = "",
@@ -23,12 +26,28 @@ def assess_regimen(regimen: Regimen, tier: str, ctx: rules.RuleContext, label: s
     return a
 
 
+def derive(patient: PatientProfile) -> PatientProfile:
+    """Fill current values from the longitudinal record when they were not entered directly."""
+    changes = {}
+    vl, cd4 = latest(patient.vl_history), latest(patient.cd4_history)
+    if patient.viral_load is None and vl is not None:
+        changes["viral_load"] = 0 if vl.censored else int(vl.value)
+    if patient.cd4 is None and cd4 is not None:
+        changes["cd4"] = int(cd4.value)
+    failed = {class_of(c) for e in patient.art_history if e.reason_stopped == "virological failure"
+              for c in e.components} - {"", "Booster"}
+    if failed - set(patient.failed_classes) and patient.status is not TreatmentStatus.NAIVE:
+        changes["failed_classes"] = frozenset(patient.failed_classes | failed)
+    return replace(patient, **changes) if changes else patient
+
+
 def recommend(patient: PatientProfile) -> Report:
+    patient = derive(patient)
     resistance: Optional[ResistanceReport] = None
     tests = patient.genotype_history
     if tests:
         resistance = interpret_history(tests, patient.minority_threshold, patient.use_hivdb)
-    ctx = rules.RuleContext(patient, resistance)
+    ctx = rules.RuleContext(patient, resistance, classify(patient.vl_history, patient.art_history))
 
     assessments: List[RegimenAssessment] = []
     for regimen in REGIMENS:
@@ -41,4 +60,6 @@ def recommend(patient: PatientProfile) -> Report:
     viable = sorted((a for a in assessments if not a.excluded),
                     key=lambda a: (-a.score, order[a.regimen.id]))
     excluded = sorted((a for a in assessments if a.excluded), key=lambda a: order[a.regimen.id])
-    return Report(patient, viable, excluded, patient_alerts(patient, resistance, viable), resistance)
+    report = Report(patient, viable, excluded, patient_alerts(patient, resistance, viable), resistance)
+    report.virology = ctx.virology
+    return report

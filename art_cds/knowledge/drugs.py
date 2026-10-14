@@ -143,3 +143,52 @@ def drug_class(code: str) -> str:
 
 def name(code: str) -> str:
     return DRUGS[code].name
+
+
+# Old and current brand names an ART history might contain -> drug codes
+_HISTORIC_BRANDS = {
+    "atripla": ("EFV", "FTC", "TDF"), "truvada": ("FTC", "TDF"), "kivexa": ("ABC", "3TC"),
+    "combivir": ("AZT", "3TC"), "trizivir": ("ABC", "3TC", "AZT"), "eviplera": ("FTC", "RPV", "TDF"),
+    "stribild": ("EVG", "COBI", "FTC", "TDF"), "genvoya": ("EVG", "COBI", "FTC", "TAF"),
+    "kaletra": ("LPV", "RTV"), "sustiva": ("EFV",), "viramune": ("NVP",), "tle": ("TDF", "3TC", "EFV"),
+    "tld": ("TDF", "3TC", "DTG"),
+}
+_EXTRA_CODES = {"EVG": "Elvitegravir", "NVP": "Nevirapine", "LPV": "Lopinavir"}
+_EXTRA_CLASSES = {"EVG": INSTI, "NVP": NNRTI, "LPV": PI}
+
+
+def class_of(code: str) -> str:
+    return DRUGS[code].drug_class if code in DRUGS else _EXTRA_CLASSES.get(code, "")
+
+
+def drugs_from_text(text: str):
+    """Resolve 'Atripla', 'DTG + TDF/FTC', 'dolutegravir, emtricitabine' etc. to drug codes."""
+    import re
+
+    from .products import PRODUCTS
+
+    found = []
+    low = text.lower()
+    for code, d in DRUGS.items():  # full names first ("tenofovir disoproxil" vs "tenofovir alafenamide")
+        if d.name.lower() in low:
+            low = low.replace(d.name.lower(), code.lower())
+    brands = dict(_HISTORIC_BRANDS)
+    for p in PRODUCTS:
+        brands.setdefault(p.brand.split(" (")[0].split()[0].lower(), p.ingredients)
+    for token in re.split(r"[\s,+/;]+", low):
+        if not token:
+            continue
+        if token in brands:
+            found += brands[token]
+            continue
+        up = token.upper()
+        if up in DRUGS or up in _EXTRA_CODES:
+            found.append(up)
+            continue
+        for code, d in DRUGS.items():
+            if d.name.lower().split()[0] == token and token != "tenofovir":
+                found.append(code)
+        for code, name in _EXTRA_CODES.items():
+            if name.lower() == token:
+                found.append(code)
+    return tuple(dict.fromkeys(found))

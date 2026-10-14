@@ -7,6 +7,7 @@ from ..knowledge.guidelines import BHIVA_ART, BHIVA_HEPATITIS, BHIVA_MONITORING,
 from ..models import Alert, LabResult, PatientProfile, Pregnancy, RegimenAssessment, TreatmentStatus, guideline
 from ..knowledge.citations import bhiva
 from .resistance import ResistanceReport
+from .virology import classify
 
 
 def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
@@ -34,6 +35,19 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
         if not (p.takes("rifampicin") or p.takes("rifabutin")):
             add("info", "Active TB without a rifamycin selected — add rifampicin or rifabutin to the co-medications so "
                 "interactions are assessed.")
+
+    vir = classify(p.vl_history, p.art_history)
+    if vir is not None:
+        level = {"confirmed virological failure": "critical", "suspected virological failure": "warning",
+                 "low-level viraemia": "warning"}.get(vir.status, "info")
+        add(level, f"Viral-load course: {vir.status}. {vir.message}", *vir.refs)
+        if vir.status == "confirmed virological failure" and p.status is not TreatmentStatus.FAILURE:
+            add("critical", "The viral-load history shows confirmed failure — reassess using the 'virological "
+                "failure' scenario.")
+    current = [e for e in p.art_history if e.current]
+    if current and current[0].components:
+        add("info", "Current regimen: " + " + ".join(current[0].components)
+            + (f" since {current[0].start}" if current[0].start else "") + ".")
 
     if p.status is TreatmentStatus.FAILURE:
         if not p.genotype_available:

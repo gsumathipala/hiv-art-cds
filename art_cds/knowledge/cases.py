@@ -87,12 +87,16 @@ CASES: Tuple[Case, ...] = (
     ),
     Case(
         "failure", "Virological failure on an NNRTI regimen",
-        "A 41-year-old woman with HIV RNA 15,000 copies/mL on efavirenz/emtricitabine/tenofovir disoproxil. "
-        "Resistance test: RT K65R, M184V, K103N.",
+        "A 41-year-old woman on efavirenz/emtricitabine/tenofovir disoproxil since 2019, suppressed until 2025; "
+        "HIV RNA now 15,000 copies/mL. Resistance test: RT K65R, M184V, K103N.",
         {"age": "41", "sex": "female", "pregnancy": "not_pregnant", "weight_kg": "66", "status": "failure",
          "failed_classes": ("NNRTI", "NRTI"), "viral_load": "15000", "cd4": "210", "crcl": "96",
          "hbsag": "negative", "hla_b5701": "negative", "genotype": "available",
-         "g0_date": "2026-09-01", "g0_rt": "K65R, M184V, K103N"},
+         "g0_date": "2026-09-01", "g0_rt": "K65R, M184V, K103N",
+         "vl_history": "2019-02-01 86000\n2019-04-01 <50\n2020-03-01 <50\n2022-05-01 <50\n2024-06-01 140\n"
+                       "2024-07-15 <50\n2025-11-01 2400\n2026-08-10 15000",
+         "cd4_history": "2019-02-01 180\n2020-03-01 360\n2022-05-01 420\n2026-08-10 210",
+         "a0_start": "2019-02-15", "a0_other": "Efavirenz/emtricitabine/tenofovir disoproxil"},
         ("K65R reduces tenofovir and abacavir activity but increases zidovudine susceptibility; M184V makes "
          "lamivudine/emtricitabine only partly active.",
          "A fully active, high-barrier anchor (dolutegravir or boosted darunavir) is the priority after failure; "

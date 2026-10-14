@@ -1,13 +1,21 @@
 """Turn submitted form data (or JSON) into a validated PatientProfile."""
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from ..knowledge.conditions import COMORBIDITIES
 from ..knowledge.interactions import COMEDICATIONS_BY_KEY
 from ..models.patient import (
-    ARV_CLASSES, ChildPugh, GenotypeTest, LabResult, PatientProfile, Pregnancy, TreatmentStatus,
+    ARV_CLASSES, STOP_REASONS, ArtEpisode, ChildPugh, GenotypeTest, LabResult, LabValue, PatientProfile, Pregnancy,
+    TreatmentStatus,
 )
+from ..knowledge.drugs import drugs_from_text
+from ..knowledge.regimens import REGIMENS_BY_ID
+
+MAX_ART = 8
+_LINE = re.compile(r"^\s*(\d{4}-\d{2}(?:-\d{2})?)[\s,;:]+(<|≤|&lt;)?\s*([\d,.]+|tnd|not detected|undetectable)",
+                   re.I)
 
 MAX_GENOTYPES = 5
 SUBTYPES = ("", "A1", "A6", "B", "C", "D", "F", "G", "CRF01_AE", "CRF02_AG", "other")
@@ -95,6 +103,62 @@ def _genotypes(form: Mapping[str, Any], errors: Errors) -> List[GenotypeTest]:
     return tests
 
 
+def _lab_series(form: Mapping[str, Any], name: str, errors: Errors, label: str) -> Tuple[LabValue, ...]:
+    """One result per line: 'YYYY-MM-DD value' (value may be '<50', 'TND'), or a JSON list of {date, value}."""
+    raw = form.get(name)
+    lines: List[str] = []
+    if isinstance(raw, list):
+        lines = [f"{r.get('date', '')} {r.get('value', '')}" for r in raw if isinstance(r, dict)]
+    elif raw:
+        lines = str(raw).splitlines()
+    out: List[LabValue] = []
+    for n, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
+        m = _LINE.match(line)
+        if not m:
+            errors[name] = f"{label}: line {n} not understood — use 'YYYY-MM-DD value'."
+            continue
+        date_, lt, value = m.group(1), m.group(2), m.group(3).lower()
+        if value in ("tnd", "not detected", "undetectable"):
+            out.append(LabValue(date_, 20.0, True))
+            continue
+        try:
+            num = float(value.replace(",", ""))
+        except ValueError:
+            errors[name] = f"{label}: line {n} has no number."
+            continue
+        out.append(LabValue(date_, num, bool(lt)))
+    return tuple(sorted(out, key=lambda v: v.date))
+
+
+def _art_history(form: Mapping[str, Any], errors: Errors) -> Tuple[ArtEpisode, ...]:
+    raw = form.get("art_history")
+    rows: List[Mapping[str, Any]] = [r for r in raw if isinstance(r, dict)] if isinstance(raw, list) else [
+        {k: form.get(f"a{i}_{k}") or "" for k in ("start", "stop", "regimen", "other", "reason")}
+        for i in range(MAX_ART)]
+    episodes = []
+    for i, r in enumerate(rows):
+        start, stop = str(r.get("start") or "").strip(), str(r.get("stop") or "").strip()
+        regimen, other = str(r.get("regimen") or "").strip(), str(r.get("other") or "").strip()
+        reason = str(r.get("reason") or r.get("reason_stopped") or "").strip()
+        if not (start or regimen or other):
+            continue
+        if reason not in STOP_REASONS:
+            errors[f"a{i}_reason"] = "Unknown reason."
+        if regimen in REGIMENS_BY_ID:
+            comps, label = REGIMENS_BY_ID[regimen].components, REGIMENS_BY_ID[regimen].short
+        else:
+            comps, label = drugs_from_text(other or regimen), (other or regimen)
+            if not comps:
+                errors[f"a{i}_other"] = f"Regimen '{label}' not recognised — enter drug names or abbreviations."
+        if stop and start and stop < start:
+            errors[f"a{i}_stop"] = "Stop date is before the start date."
+        episodes.append(ArtEpisode(start=start[:10], stop=stop[:10], regimen=label[:80], components=comps,
+                                   reason_stopped=reason))
+    return tuple(sorted(episodes, key=lambda e: e.start))
+
+
 def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Errors]:
     errors: Errors = {}
     age = _number(form, "age", errors, 0, 120, required=True, label="Age")
@@ -153,6 +217,9 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
         tropism=tropism,
         comorbidities=_subset(_getlist(form, "comorbidities"), COMORBIDITIES, "comorbidities", errors),
         comedications=_subset(_getlist(form, "comedications"), COMEDICATIONS_BY_KEY, "comedications", errors),
+        vl_history=_lab_series(form, "vl_history", errors, "Viral load history"),
+        cd4_history=_lab_series(form, "cd4_history", errors, "CD4 history"),
+        art_history=_art_history(form, errors),
         prefers_single_tablet=_bool(form, "prefers_single_tablet"),
         prefers_long_acting=_bool(form, "prefers_long_acting"),
         adherence_concerns=_bool(form, "adherence_concerns"),

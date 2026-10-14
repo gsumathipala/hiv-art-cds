@@ -95,6 +95,34 @@
   </fieldset>
 
   <fieldset>
+    <legend>Longitudinal record</legend>
+    <p class="small muted">Optional, but it makes the assessment much better: the viral-load course is classified (blip,
+      low-level viraemia, failure — BHIVA §7.2–7.4), current values are taken from the latest result if left blank above,
+      and classes in any regimen stopped for virological failure are counted as failed.</p>
+    <div class="fields">
+      <label class="f">Viral load history {{ error('vl_history') }}<span class="hint">one per line: <code>2025-03-14 &lt;50</code></span>
+        <textarea name="vl_history" rows="5" class="mono" placeholder="2024-01-10 48000&#10;2024-03-02 <50">{{ v('vl_history') }}</textarea></label>
+      <label class="f">CD4 history {{ error('cd4_history') }}<span class="hint">one per line: <code>2025-03-14 520</code></span>
+        <textarea name="cd4_history" rows="5" class="mono" placeholder="2024-01-10 310">{{ v('cd4_history') }}</textarea></label>
+    </div>
+    <div class="group-title">ART history</div>
+    <div class="table-scroll">
+    <table class="data art-table">
+      <tr><th>Start</th><th>Stop (blank = current)</th><th>Regimen</th><th>or drugs / brand</th><th>Why stopped</th></tr>
+      {% for i in range(8) %}
+      <tr data-art-row="{{ i }}">
+        <td><input type="date" name="a{{ i }}_start" value="{{ v('a%d_start' % i) }}"></td>
+        <td><input type="date" name="a{{ i }}_stop" value="{{ v('a%d_stop' % i) }}">{{ error('a%d_stop' % i) }}</td>
+        <td><select name="a{{ i }}_regimen"><option value="">—</option>{% for r in regimens %}<option value="{{ r.id }}" {{ sel('a%d_regimen' % i, r.id) }}>{{ r.short }}</option>{% endfor %}</select></td>
+        <td><input type="text" name="a{{ i }}_other" placeholder="e.g. Atripla, LPV/r + AZT/3TC" value="{{ v('a%d_other' % i) }}">{{ error('a%d_other' % i) }}</td>
+        <td><select name="a{{ i }}_reason">{% for r in stop_reasons %}<option value="{{ r }}" {{ sel('a%d_reason' % i, r, '') }}>{{ r or '—' }}</option>{% endfor %}</select></td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    <button type="button" class="btn ghost" id="add-art">+ Add regimen</button>
+  </fieldset>
+
+  <fieldset>
     <legend>Organ function &amp; co-infection</legend>
     <div class="fields">
       <label class="f">Creatinine clearance (mL/min) <span class="hint">Cockcroft–Gault, as used in SmPCs</span> {{ error('crcl') }}<input type="number" step="0.1" name="crcl" value="{{ v('crcl') }}"></label>
@@ -137,6 +165,8 @@
   <div class="form-actions">
     <button class="btn" type="submit">Recommend regimens</button>
     <a class="btn ghost" href="{{ url_for('assess.form') }}">Clear</a>
+    <button class="btn ghost" type="button" id="save-case" title="Download everything entered as a file on this computer">Save case to file</button>
+    <label class="btn ghost" title="Reload a case saved earlier">Load case file<input type="file" id="load-case" accept=".json,application/json" hidden></label>
   </div>
 </form>
 {% endblock %}
