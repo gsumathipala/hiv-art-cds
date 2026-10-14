@@ -103,6 +103,11 @@
         <dt>HIV RNA</dt><dd>{{ '{:,}'.format(p.viral_load) if p.viral_load is not none else 'unknown' }}</dd>
         <dt>CD4</dt><dd>{{ p.cd4 if p.cd4 is not none else 'unknown' }}</dd>
         <dt>CrCl</dt><dd>{{ (p.crcl|round(0)|int ~ ' mL/min') if p.crcl is not none else 'unknown' }}{% if p.on_dialysis %} · haemodialysis{% endif %}</dd>
+        {% if report.kidney %}{% set k = report.kidney %}
+        <dt>eGFR</dt><dd>{% if k.egfr_cr %}{{ k.egfr_cr|round|int }} (creatinine){% endif %}{% if k.egfr_cys %} · {{ k.egfr_cys|round|int }} (cystatin){% endif %}{% if k.egfr_combined %} · {{ k.egfr_combined|round|int }} (combined){% endif %} <span class="muted">mL/min/1.73 m²</span></dd>
+        {% if k.note %}<dt></dt><dd class="small" style="font-weight:400">{{ k.note }}</dd>{% endif %}{% endif %}
+        {% if p.qrisk3 is not none %}<dt>QRISK3</dt><dd>{{ p.qrisk3 }}%</dd>{% endif %}
+        {% if p.frax_mof is not none or p.frax_hip is not none %}<dt>FRAX</dt><dd>{{ p.frax_mof or '—' }}% MOF · {{ p.frax_hip or '—' }}% hip</dd>{% endif %}
         <dt>Liver</dt><dd>{{ 'Child-Pugh ' ~ p.child_pugh.value if p.child_pugh.value != 'none' else 'no impairment' }}</dd>
         <dt>HBsAg</dt><dd>{{ p.hbsag.value }}</dd>
         <dt>HLA-B*57:01</dt><dd>{{ p.hla_b5701.value }}</dd>

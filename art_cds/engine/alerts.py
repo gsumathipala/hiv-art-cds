@@ -96,6 +96,9 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
         add("info", "Breastfeeding with sustained suppression can be supported with shared decision-making and monthly "
             "maternal and infant monitoring.", guideline(BHIVA_PREGNANCY))
     if 40 <= p.age <= 75 and not p.has("cvd"):
+        if p.qrisk3 is not None:
+            add("info", f"QRISK3 {p.qrisk3:g}% (10-year). QRISK3 has no term for HIV and underestimates risk in people "
+                "with HIV.")
         add("info", "Cardiovascular prevention: consider statin therapy for people with HIV aged 40–75 (REPRIEVE); check "
             "the statin against the chosen regimen.", guideline(BHIVA_ART))
     if p.prefers_long_acting and p.status is not TreatmentStatus.SUPPRESSED:

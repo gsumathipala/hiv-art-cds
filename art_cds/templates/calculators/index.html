@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Calculators{% endblock %}
+{% macro inp(name, label, step='any', hint='') %}<label class="f">{{ label }}{% if hint %}<span class="hint">{{ hint }}</span>{% endif %}<input type="number" step="{{ step }}" name="{{ name }}" value="{{ a.get(name, '') }}"></label>{% endmacro %}
+{% macro sexsel() %}<label class="f">Sex<select name="sex"><option value="male" {{ 'selected' if a.get('sex') != 'female' }}>Male</option><option value="female" {{ 'selected' if a.get('sex') == 'female' }}>Female</option></select></label>{% endmacro %}
+{% block content %}
+<h1>Clinical calculators</h1>
+{% for e in errors %}<div class="alert warning">{{ e }}</div>{% endfor %}
+<div class="grid two">
+  <form class="card" method="get"><input type="hidden" name="calc" value="kidney">
+    <h3>Kidney function</h3>
+    <div class="fields">{{ inp('age', 'Age', 1) }}{{ sexsel() }}{{ inp('weight', 'Weight (kg)') }}{{ inp('creatinine', 'Creatinine (µmol/L)') }}{{ inp('cystatin', 'Cystatin C (mg/L)', hint='optional') }}</div>
+    <button class="btn">Calculate</button>
+    {% if kidney %}
+    <table class="data" style="margin-top:10px">
+      <tr><td>Creatinine clearance (Cockcroft–Gault)</td><td><b>{{ kidney.crcl or '—' }}</b> mL/min — used for SmPC dose limits</td></tr>
+      <tr><td>eGFR CKD-EPI 2021 (creatinine)</td><td><b>{{ kidney.egfr_cr or '—' }}</b> mL/min/1.73 m²</td></tr>
+      <tr><td>eGFR CKD-EPI 2012 (cystatin C)</td><td><b>{{ kidney.egfr_cys or '—' }}</b></td></tr>
+      <tr><td>eGFR CKD-EPI 2021 (creatinine + cystatin C)</td><td><b>{{ kidney.egfr_combined or '—' }}</b></td></tr>
+    </table>
+    {% if kidney.note %}<p class="small">{{ kidney.note }}</p>{% endif %}
+    {% endif %}
+    <p class="small muted">Dolutegravir, bictegravir, rilpivirine and cobicistat inhibit tubular creatinine secretion, raising
+      creatinine without changing true GFR; cystatin C avoids this (BHIVA 2025 §8.4).</p>
+  </form>
+
+  <form class="card" method="get"><input type="hidden" name="calc" value="childpugh">
+    <h3>Child-Pugh</h3>
+    <div class="fields">{{ inp('bilirubin', 'Bilirubin (µmol/L)') }}{{ inp('albumin', 'Albumin (g/L)') }}{{ inp('inr', 'INR') }}
+      <label class="f">Ascites<select name="ascites">{% for o in ['none','mild','severe'] %}<option {{ 'selected' if a.get('ascites') == o }}>{{ o }}</option>{% endfor %}</select></label>
+      <label class="f">Encephalopathy<select name="encephalopathy">{% for o, l in [('none','none'),('mild','grade 1–2'),('severe','grade 3–4')] %}<option value="{{ o }}" {{ 'selected' if a.get('encephalopathy') == o }}>{{ l }}</option>{% endfor %}</select></label></div>
+    <button class="btn">Calculate</button>
+    {% if cp %}<p style="margin-top:10px">Score <b>{{ cp[0] }}</b> — <span class="badge {{ 'b-preferred' if cp[1] == 'A' else 'b-caution' if cp[1] == 'B' else 'b-exclude' }}">Child-Pugh {{ cp[1] }}</span></p>{% endif %}
+    <p class="small muted">A 5–6, B 7–9, C 10–15. Bilirubin &lt;34 / 34–50 / &gt;50 µmol/L; albumin &gt;35 / 28–35 / &lt;28 g/L;
+      INR &lt;1.7 / 1.7–2.3 / &gt;2.3.</p>
+  </form>
+
+  <form class="card" method="get"><input type="hidden" name="calc" value="qrisk3">
+    <h3>QRISK3-2017 (10-year cardiovascular risk)</h3>
+    <div class="fields">{{ inp('age', 'Age (25–84)', 1) }}{{ sexsel() }}
+      <label class="f">Ethnicity<select name="ethnicity">{% for e in calc.ETHNICITY %}<option value="{{ loop.index }}" {{ 'selected' if a.get('ethnicity') == loop.index|string }}>{{ e }}</option>{% endfor %}</select></label>
+      <label class="f">Smoking<select name="smoking">{% for s in calc.SMOKING %}<option value="{{ loop.index0 }}" {{ 'selected' if a.get('smoking') == loop.index0|string }}>{{ s }}</option>{% endfor %}</select></label>
+      {{ inp('height', 'Height (cm)') }}{{ inp('weight', 'Weight (kg)') }}{{ inp('ratio', 'Total cholesterol/HDL ratio') }}
+      {{ inp('sbp', 'Systolic BP (mmHg)') }}{{ inp('sbp_sd', 'SD of SBP readings', hint='0 if unknown') }}{{ inp('townsend', 'Townsend score', hint='0 if unknown') }}</div>
+    <div class="checks">{% for k, l in [('af','Atrial fibrillation'),('atypical_antipsychotic','Atypical antipsychotic'),('corticosteroids','Regular oral steroids'),('erectile_dysfunction','Erectile dysfunction (men)'),('migraine','Migraine'),('rheumatoid_arthritis','Rheumatoid arthritis'),('ckd_3_5','CKD stage 3–5'),('severe_mental_illness','Severe mental illness'),('sle','SLE'),('treated_hypertension','Treated hypertension'),('type1_diabetes','Type 1 diabetes'),('type2_diabetes','Type 2 diabetes'),('family_history_chd','Angina/MI in a 1st-degree relative < 60')] %}
+      <label><input type="checkbox" name="{{ k }}" {{ 'checked' if a.get(k) == 'on' }}> {{ l }}</label>{% endfor %}</div>
+    <button class="btn">Calculate</button>
+    {% if qrisk is not none %}
+      <p style="margin-top:10px">10-year risk: <b style="font-size:1.3rem">{{ '%.1f'|format(qrisk) }}%</b>
+        <span class="badge {{ 'b-exclude' if qrisk >= 20 else 'b-caution' if qrisk >= 10 else 'b-preferred' }}">{{ 'high' if qrisk >= 10 else 'below 10%' }}</span></p>
+      <p class="small">{{ calc.HIV_CV_NOTE }}</p>
+    {% endif %}
+    <details class="small"><summary>ClinRisk disclaimer (QRISK3 licence terms)</summary><p>{{ calc.QRISK3_DISCLAIMER }}</p></details>
+  </form>
+
+  <div class="card">
+    <h3>FRAX (fracture risk)</h3>
+    <p>FRAX is proprietary and cannot be reproduced here. Calculate it with the
+      <a href="{{ calc.FRAX_UK_URL }}" target="_blank" rel="noopener">official FRAX UK tool</a> and enter the two results on the
+      assessment form.</p>
+    <p class="small">BHIVA 2025 §8.2 recommends against tenofovir disoproxil with osteoporosis, a fragility fracture, a 10-year
+      major osteoporotic fracture probability &gt; 5% or a hip fracture probability &gt; 1%.</p>
+  </div>
+</div>
+{% endblock %}

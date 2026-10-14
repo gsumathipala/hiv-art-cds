@@ -70,6 +70,14 @@ def _enum(form, name, enum, default, errors):
         return default
 
 
+def _choice(form, name, allowed, errors):
+    value = form.get(name) or ""
+    if value not in allowed:
+        errors[name] = f"Invalid value for {name}."
+        return ""
+    return value
+
+
 def _subset(values: Iterable[str], allowed: Iterable[str], name: str, errors: Errors) -> frozenset:
     allowed = set(allowed)
     bad = [v for v in values if v not in allowed]
@@ -217,6 +225,17 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
         tropism=tropism,
         comorbidities=_subset(_getlist(form, "comorbidities"), COMORBIDITIES, "comorbidities", errors),
         comedications=_subset(_getlist(form, "comedications"), COMEDICATIONS_BY_KEY, "comedications", errors),
+        creatinine_umol=_number(form, "creatinine_umol", errors, 10, 2000, integer=False, label="Creatinine"),
+        cystatin_c=_number(form, "cystatin_c", errors, 0.2, 10, integer=False, label="Cystatin C"),
+        height_cm=_number(form, "height_cm", errors, 100, 250, integer=False, label="Height"),
+        bilirubin_umol=_number(form, "bilirubin_umol", errors, 1, 1000, integer=False, label="Bilirubin"),
+        albumin_g_l=_number(form, "albumin_g_l", errors, 5, 70, integer=False, label="Albumin"),
+        inr=_number(form, "inr", errors, 0.5, 10, integer=False, label="INR"),
+        ascites=_choice(form, "ascites", ("", "none", "mild", "severe"), errors),
+        encephalopathy=_choice(form, "encephalopathy", ("", "none", "mild", "severe"), errors),
+        qrisk3=_number(form, "qrisk3", errors, 0, 100, integer=False, label="QRISK3"),
+        frax_mof=_number(form, "frax_mof", errors, 0, 100, integer=False, label="FRAX major osteoporotic"),
+        frax_hip=_number(form, "frax_hip", errors, 0, 100, integer=False, label="FRAX hip"),
         vl_history=_lab_series(form, "vl_history", errors, "Viral load history"),
         cd4_history=_lab_series(form, "cd4_history", errors, "CD4 history"),
         art_history=_art_history(form, errors),

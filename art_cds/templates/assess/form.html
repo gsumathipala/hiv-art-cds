@@ -133,6 +133,33 @@
       <label class="f">HLA-B*57:01
         <select name="hla_b5701">{% for val in ['unknown','negative','positive'] %}<option value="{{ val }}" {{ sel('hla_b5701', val, 'unknown') }}>{{ val|capitalize }}</option>{% endfor %}</select></label>
     </div>
+    <details {{ 'open' if v('creatinine_umol') or v('bilirubin_umol') or v('qrisk3') or v('frax_mof') }}>
+      <summary><b>Calculators</b> — creatinine clearance, eGFR, Child-Pugh, QRISK3, FRAX
+        <a class="small" href="{{ url_for('calculators.index') }}" target="_blank">(open the calculators page)</a></summary>
+      <div class="fields" style="margin-top:10px">
+        <label class="f">Creatinine (µmol/L) {{ error('creatinine_umol') }}<span class="hint">with weight → Cockcroft–Gault CrCl if CrCl is blank</span>
+          <input type="number" step="1" name="creatinine_umol" value="{{ v('creatinine_umol') }}"></label>
+        <label class="f">Cystatin C (mg/L) {{ error('cystatin_c') }}<span class="hint">for CKD-EPI cystatin eGFR</span>
+          <input type="number" step="0.01" name="cystatin_c" value="{{ v('cystatin_c') }}"></label>
+        <label class="f">Height (cm) {{ error('height_cm') }}<input type="number" step="0.5" name="height_cm" value="{{ v('height_cm') }}"></label>
+      </div>
+      <div class="group-title">Child-Pugh (fills hepatic impairment if left at “None”)</div>
+      <div class="fields">
+        <label class="f">Bilirubin (µmol/L) {{ error('bilirubin_umol') }}<input type="number" step="1" name="bilirubin_umol" value="{{ v('bilirubin_umol') }}"></label>
+        <label class="f">Albumin (g/L) {{ error('albumin_g_l') }}<input type="number" step="1" name="albumin_g_l" value="{{ v('albumin_g_l') }}"></label>
+        <label class="f">INR {{ error('inr') }}<input type="number" step="0.1" name="inr" value="{{ v('inr') }}"></label>
+        <label class="f">Ascites<select name="ascites">{% for o in ['', 'none', 'mild', 'severe'] %}<option value="{{ o }}" {{ sel('ascites', o, '') }}>{{ o or '—' }}</option>{% endfor %}</select></label>
+        <label class="f">Encephalopathy<select name="encephalopathy">{% for o, l in [('', '—'), ('none', 'none'), ('mild', 'grade 1–2'), ('severe', 'grade 3–4')] %}<option value="{{ o }}" {{ sel('encephalopathy', o, '') }}>{{ l }}</option>{% endfor %}</select></label>
+      </div>
+      <div class="group-title">Risk scores</div>
+      <div class="fields">
+        <label class="f">QRISK3 10-year risk (%) {{ error('qrisk3') }}<span class="hint">≥ 10% counts as high cardiovascular risk</span>
+          <input type="number" step="0.1" name="qrisk3" value="{{ v('qrisk3') }}"></label>
+        <label class="f">FRAX major osteoporotic (%) {{ error('frax_mof') }}<span class="hint"><a href="https://frax.shef.ac.uk/FRAX/tool.aspx?country=1" target="_blank" rel="noopener">FRAX UK</a></span>
+          <input type="number" step="0.1" name="frax_mof" value="{{ v('frax_mof') }}"></label>
+        <label class="f">FRAX hip (%) {{ error('frax_hip') }}<input type="number" step="0.1" name="frax_hip" value="{{ v('frax_hip') }}"></label>
+      </div>
+    </details>
     <div class="checks">
       <label><input type="checkbox" name="on_dialysis" {{ chk('on_dialysis') }}> On chronic haemodialysis</label>
       <label><input type="checkbox" name="hcv" {{ chk('hcv') }}> Hepatitis C viraemia</label>

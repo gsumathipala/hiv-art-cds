@@ -126,6 +126,7 @@ class Report:
     alerts: List[Alert]
     resistance: Optional["ResistanceReport"]
     virology: Optional[Any] = None  # engine.virology.VirologyAssessment
+    kidney: Optional[Any] = None  # calculators.KidneyFunction
 
     @property
     def top(self) -> Optional[RegimenAssessment]:

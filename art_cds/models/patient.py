@@ -134,6 +134,19 @@ class PatientProfile:
     comorbidities: FrozenSet[str] = frozenset()
     comedications: FrozenSet[str] = frozenset()
 
+    # measurements feeding the calculators
+    creatinine_umol: Optional[float] = None
+    cystatin_c: Optional[float] = None  # mg/L
+    height_cm: Optional[float] = None
+    bilirubin_umol: Optional[float] = None
+    albumin_g_l: Optional[float] = None
+    inr: Optional[float] = None
+    ascites: str = ""  # none | mild | severe
+    encephalopathy: str = ""  # none | mild | severe
+    qrisk3: Optional[float] = None  # 10-year CVD risk, %
+    frax_mof: Optional[float] = None  # 10-year major osteoporotic fracture probability, %
+    frax_hip: Optional[float] = None  # 10-year hip fracture probability, %
+
     vl_history: Tuple[LabValue, ...] = ()  # sorted by date
     cd4_history: Tuple[LabValue, ...] = ()
     art_history: Tuple[ArtEpisode, ...] = ()
@@ -149,6 +162,15 @@ class PatientProfile:
 
     def has(self, condition: str) -> bool:
         return condition in self.comorbidities
+
+    @property
+    def high_cv_risk(self) -> bool:
+        return self.has("cvd") or (self.qrisk3 is not None and self.qrisk3 >= 10)
+
+    @property
+    def high_fracture_risk(self) -> bool:
+        """BHIVA §8.2 thresholds: osteoporosis/fragility fracture, FRAX MOF > 5% or hip > 1%."""
+        return self.has("osteoporosis") or (self.frax_mof or 0) > 5 or (self.frax_hip or 0) > 1
 
     def takes(self, comedication: str) -> bool:
         return comedication in self.comedications

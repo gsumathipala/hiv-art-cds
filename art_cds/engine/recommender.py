@@ -6,8 +6,9 @@ from typing import List, Optional
 
 from ..knowledge.guidelines import TIER_SCORE, tier_for
 from ..knowledge.regimens import REGIMENS, Regimen
+from ..calculators import child_pugh, cockcroft_gault, kidney
 from ..knowledge.drugs import class_of
-from ..models import PatientProfile, RegimenAssessment, Report, TreatmentStatus
+from ..models import ChildPugh, PatientProfile, RegimenAssessment, Report, TreatmentStatus
 from . import rules
 from .alerts import patient_alerts
 from .monitoring import monitoring_plan
@@ -29,6 +30,14 @@ def assess_regimen(regimen: Regimen, tier: str, ctx: rules.RuleContext, label: s
 def derive(patient: PatientProfile) -> PatientProfile:
     """Fill current values from the longitudinal record when they were not entered directly."""
     changes = {}
+    if patient.crcl is None and patient.creatinine_umol and patient.weight_kg:
+        changes["crcl"] = round(cockcroft_gault(patient.age, patient.weight_kg, patient.sex == "female",
+                                                patient.creatinine_umol), 1)
+    if (patient.child_pugh is ChildPugh.NONE and None not in (patient.bilirubin_umol, patient.albumin_g_l, patient.inr)
+            and patient.ascites and patient.encephalopathy):
+        score, cls = child_pugh(patient.bilirubin_umol, patient.albumin_g_l, patient.inr, patient.ascites,
+                                patient.encephalopathy)
+        changes["child_pugh"] = ChildPugh(cls)
     vl, cd4 = latest(patient.vl_history), latest(patient.cd4_history)
     if patient.viral_load is None and vl is not None:
         changes["viral_load"] = 0 if vl.censored else int(vl.value)
@@ -62,4 +71,6 @@ def recommend(patient: PatientProfile) -> Report:
     excluded = sorted((a for a in assessments if a.excluded), key=lambda a: order[a.regimen.id])
     report = Report(patient, viable, excluded, patient_alerts(patient, resistance, viable), resistance)
     report.virology = ctx.virology
+    report.kidney = kidney(patient.age, patient.sex == "female", patient.weight_kg, patient.creatinine_umol,
+                           patient.cystatin_c) if patient.creatinine_umol or patient.cystatin_c else None
     return report

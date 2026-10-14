@@ -94,7 +94,7 @@ def pregnancy(regimen, ctx):
             out.append(finding("pregnancy", Severity.INFO,
                                "Darunavir levels fall with once-daily dosing in pregnancy.", refs=(DRV_BID,),
                                dose_change="Darunavir 600 mg + ritonavir 100 mg twice daily when started in pregnancy"))
-        if "ABC" in comps and p.has("cvd"):
+        if "ABC" in comps and p.high_cv_risk:
             out.append(finding("pregnancy", Severity.CAUTION,
                                "BHIVA requires an estimated 10-year cardiovascular risk < 10% for abacavir in pregnancy.",
                                -25, refs=(ABC_CVD,)))

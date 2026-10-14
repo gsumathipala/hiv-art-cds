@@ -15,6 +15,8 @@ TDF_YOUNG = bhiva(_A, "8.1", r"avoiding tenofovir DF in adolescents and young ad
 CKD_PI = bhiva(_A, "8.4", r"darunavir/ritonavir or darunavir/cobicistat in individuals with an eGFR of <60")
 CKD_STOP = bhiva(_A, "8.4", r"against continued use of tenofovir DF, lopinavir/ritonavir or atazanavir")
 ABC_CVD_BHIVA = bhiva(_A, "5.3.6", r"Use of abacavir in people with CVD risk factors")
+TDF_FRAX = bhiva(_A, "8.2", r"10-year probability of a major osteoporotic fracture >5% and/or a 10-year probability "
+                            r"of a hip fracture >1%")
 
 ABC_MI = claim("ziagen", "4.4", r"myocardial infarction")
 TDF_BONE = claim("viread", "4.4", r"bone mineral density")
@@ -34,7 +36,7 @@ def tolerability(regimen, ctx):
     boosted = regimen.boosted
     out = []
 
-    if p.has("cvd"):
+    if p.high_cv_risk:
         if "ABC" in comps:
             out.append(finding("tolerability", Severity.CAUTION,
                                "Abacavir is associated with a higher risk of myocardial infarction — avoid with high "
@@ -43,11 +45,14 @@ def tolerability(regimen, ctx):
             out.append(finding("tolerability", Severity.CAUTION,
                                "Boosted PIs raise lipids, and cumulative darunavir exposure has been linked to "
                                "cardiovascular disease.", -8, refs=(BHIVA,)))
-    if p.has("osteoporosis"):
+    if p.high_fracture_risk:
         if "TDF" in comps:
+            why = "Osteoporosis or fragility fracture" if p.has("osteoporosis") else \
+                f"FRAX {p.frax_mof or 0:g}% major osteoporotic / {p.frax_hip or 0:g}% hip"
             out.append(finding("tolerability", Severity.EXCLUDE,
-                               "Osteoporosis or fragility fracture — BHIVA recommends against tenofovir disoproxil.",
-                               refs=(TDF_BONE_BHIVA, TDF_BONE)))
+                               f"{why} — BHIVA recommends against tenofovir disoproxil (osteoporosis, fragility "
+                               "fracture, FRAX major osteoporotic > 5% or hip > 1%).",
+                               refs=(TDF_BONE_BHIVA, TDF_FRAX, TDF_BONE)))
         elif "TAF" in comps or "ABC" in comps:
             out.append(finding("tolerability", Severity.BENEFIT, "Backbone with less bone toxicity than TDF.", 5,
                                refs=(BHIVA,)))
