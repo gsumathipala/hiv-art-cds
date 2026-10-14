@@ -225,6 +225,7 @@ def parse_patient(form: Mapping[str, Any]) -> Tuple[Optional[PatientProfile], Er
         tropism=tropism,
         comorbidities=_subset(_getlist(form, "comorbidities"), COMORBIDITIES, "comorbidities", errors),
         comedications=_subset(_getlist(form, "comedications"), COMEDICATIONS_BY_KEY, "comedications", errors),
+        medicines_text=str(form.get("medicines_text") or "")[:4000],
         creatinine_umol=_number(form, "creatinine_umol", errors, 10, 2000, integer=False, label="Creatinine"),
         cystatin_c=_number(form, "cystatin_c", errors, 0.2, 10, integer=False, label="Cystatin C"),
         height_cm=_number(form, "height_cm", errors, 100, 250, integer=False, label="Height"),

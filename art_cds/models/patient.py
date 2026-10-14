@@ -133,6 +133,7 @@ class PatientProfile:
 
     comorbidities: FrozenSet[str] = frozenset()
     comedications: FrozenSet[str] = frozenset()
+    medicines_text: str = ""  # free-text medicines list, reconciled into comedications
 
     # measurements feeding the calculators
     creatinine_umol: Optional[float] = None

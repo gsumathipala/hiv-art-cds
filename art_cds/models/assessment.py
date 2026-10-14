@@ -127,6 +127,7 @@ class Report:
     resistance: Optional["ResistanceReport"]
     virology: Optional[Any] = None  # engine.virology.VirologyAssessment
     kidney: Optional[Any] = None  # calculators.KidneyFunction
+    medicines: List[Any] = field(default_factory=list)  # knowledge.medicines.Reconciled
 
     @property
     def top(self) -> Optional[RegimenAssessment]:

@@ -114,6 +114,16 @@
         {% if p.failed_classes %}<dt>Failed classes</dt><dd>{{ p.failed_classes|sort|join(', ') }}</dd>{% endif %}
       </dl>
     </div>
+    {% if report.medicines %}
+    <div class="card">
+      <h3>Medicines reconciliation</h3>
+      <table class="data">{% for m in report.medicines %}
+        <tr><td>{{ m.text }}</td><td>{% if m.key %}<span class="badge b-info">{{ comed_labels[m.key] }}</span>{% for x in m.also %} <span class="badge b-info">{{ comed_labels[x] }}</span>{% endfor %}{% if m.fuzzy %}<span class="small muted"> (read as “{{ m.matched_as }}”)</span>{% endif %}{% if m.dmd_vtm %}<br><span class="small mono">dm+d VTM {{ m.dmd_vtm }}</span>{% endif %}
+          {% else %}<span class="badge b-caution">not in table</span>{% endif %}</td></tr>{% endfor %}
+      </table>
+      <p class="small muted">Not in the table ≠ no interaction. <a href="https://www.hiv-druginteractions.org/checker" target="_blank" rel="noopener">Liverpool checker</a></p>
+    </div>
+    {% endif %}
     {% if report.resistance %}
     <div class="card">
       <h3>Genotypic susceptibility</h3>

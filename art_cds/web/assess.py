@@ -64,7 +64,7 @@ def submit():
     chart = timeline.render(p.vl_history, p.cd4_history, p.art_history,
                             report.virology.labels if report.virology else ())
     return render_template("assess/report.html", report=report, values=request.form, case=case, timeline=chart,
-                           audit_ref=audit_ref)
+                           audit_ref=audit_ref, comed_labels={c.key: c.label for c in COMEDICATIONS})
 
 
 def _audit(report):

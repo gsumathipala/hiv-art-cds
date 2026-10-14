@@ -8,6 +8,7 @@ from ..knowledge.guidelines import TIER_SCORE, tier_for
 from ..knowledge.regimens import REGIMENS, Regimen
 from ..calculators import child_pugh, cockcroft_gault, kidney
 from ..knowledge.drugs import class_of
+from ..knowledge.medicines import reconcile
 from ..models import ChildPugh, PatientProfile, RegimenAssessment, Report, TreatmentStatus
 from . import rules
 from .alerts import patient_alerts
@@ -38,6 +39,10 @@ def derive(patient: PatientProfile) -> PatientProfile:
         score, cls = child_pugh(patient.bilirubin_umol, patient.albumin_g_l, patient.inr, patient.ascites,
                                 patient.encephalopathy)
         changes["child_pugh"] = ChildPugh(cls)
+    if patient.medicines_text:
+        matched = {k for r in reconcile(patient.medicines_text) if r.key for k in (r.key,) + r.also}
+        if matched - set(patient.comedications):
+            changes["comedications"] = frozenset(patient.comedications | matched)
     vl, cd4 = latest(patient.vl_history), latest(patient.cd4_history)
     if patient.viral_load is None and vl is not None:
         changes["viral_load"] = 0 if vl.censored else int(vl.value)
@@ -71,6 +76,7 @@ def recommend(patient: PatientProfile) -> Report:
     excluded = sorted((a for a in assessments if a.excluded), key=lambda a: order[a.regimen.id])
     report = Report(patient, viable, excluded, patient_alerts(patient, resistance, viable), resistance)
     report.virology = ctx.virology
+    report.medicines = reconcile(patient.medicines_text) if patient.medicines_text else []
     report.kidney = kidney(patient.age, patient.sex == "female", patient.weight_kg, patient.creatinine_umol,
                            patient.cystatin_c) if patient.creatinine_umol or patient.cystatin_c else None
     return report

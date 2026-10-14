@@ -71,6 +71,13 @@ def patient_alerts(p: PatientProfile, res: Optional[ResistanceReport],
         add("warning", "Previous long-acting cabotegravir PrEP: request an integrase genotype; HIV RNA testing may be "
             "needed to diagnose infection, and serology can be delayed.", guideline(BHIVA_ART))
 
+    if p.medicines_text:
+        from ..knowledge.medicines import reconcile
+        unknown = [r.text for r in reconcile(p.medicines_text) if not r.key]
+        if unknown:
+            add("warning", "Not in this tool's interaction table — check with the Liverpool HIV interaction checker "
+                "(hiv-druginteractions.org): " + "; ".join(unknown) + ".")
+
     if p.hbsag is LabResult.UNKNOWN:
         add("warning", "Hepatitis B status unknown — check HBsAg, anti-HBc and anti-HBs; vaccinate if non-immune.",
             guideline(BHIVA_HEPATITIS))
