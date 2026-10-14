@@ -267,3 +267,15 @@ table.data th { background: var(--surface-2); font-weight: 700; }
   .topbar, .form-actions, footer, .no-print { display: none !important; }
   body { background: #fff; } .card, .reg { box-shadow: none; }
 }
+
+/* quiz */
+.quiz-options { display: grid; gap: 8px; margin-top: 12px; }
+.quiz-option { display: flex; gap: 10px; align-items: flex-start; padding: 11px 14px; border: 1px solid var(--line);
+  border-radius: 10px; text-decoration: none; color: var(--ink); background: var(--surface); }
+.quiz-option:hover { border-color: var(--brand-2); }
+.quiz-option .letter { font-weight: 800; color: var(--ink-2); flex: none; width: 1.2em; }
+.quiz-option.correct { border-color: var(--ok); background: var(--ok-bg); }
+.quiz-option.correct .letter { color: var(--ok); }
+.quiz-option.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.quiz-option.wrong .letter { color: var(--bad); }
+.quiz-mark { font-size: .8rem; }

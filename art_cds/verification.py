@@ -5,6 +5,8 @@ import re
 from typing import List, Tuple
 
 from .engine import recommender  # noqa: F401  (importing registers every claim)
+from .knowledge import quiz  # noqa: F401
+from . import longacting, perinatal  # noqa: F401
 from .knowledge import smpc
 from .knowledge.citations import GUIDELINE_CLAIMS, SMPC_CLAIMS as CLAIMS, guideline_text
 

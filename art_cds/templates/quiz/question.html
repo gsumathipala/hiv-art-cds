@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ref_link with context %}
+{% block title %}Quiz question {{ number }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('quiz.index') }}">Quiz</a> › question {{ number }} of {{ total }} · {{ q.topic }}</p>
+<div class="card" data-quiz="{{ q.id }}" data-answer="{{ q.answer }}">
+  <h2>{{ q.stem }}</h2>
+  <div class="quiz-options">
+    {% for opt in q.options %}
+    <a class="quiz-option {{ 'correct' if chosen is not none and loop.index0 == q.answer }}{{ ' wrong' if chosen is not none and loop.index0 == chosen and chosen != q.answer }}"
+       href="{{ url_for('quiz.question', qid=q.id, a=loop.index0) }}">
+      <span class="letter">{{ 'ABCD'[loop.index0] }}</span> {{ opt }}</a>
+    {% endfor %}
+  </div>
+  {% if chosen is not none %}
+  <div class="alert {{ 'info' if chosen == q.answer else 'warning' }}" style="margin-top:14px">
+    <b>{{ 'Correct.' if chosen == q.answer else 'Not quite — the answer is ' ~ 'ABCD'[q.answer] ~ '.' }}</b>
+    {{ q.explanation }}
+    {% if q.refs %}<div class="refs" style="margin-top:6px">{% for r in q.refs %}{{ ref_link(r) }}{% endfor %}</div>{% endif %}
+  </div>
+  <div class="row" style="margin-top:12px">
+    {% if q.case %}<a class="btn ghost" href="{{ url_for('assess.form', case=q.case) }}">Open the related case in the decision tool</a>{% endif %}
+    <span class="spacer"></span>
+    {% if prev_id %}<a class="btn ghost" href="{{ url_for('quiz.question', qid=prev_id) }}">← Previous</a>{% endif %}
+    {% if next_id %}<a class="btn" href="{{ url_for('quiz.question', qid=next_id) }}">Next question →</a>
+    {% else %}<a class="btn" href="{{ url_for('quiz.index') }}">Finish</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

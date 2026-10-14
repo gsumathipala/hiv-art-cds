@@ -101,3 +101,49 @@
     select(initial || buttons[0]);
   });
 })();
+
+// Quiz progress — kept in this browser only (localStorage), never sent anywhere.
+(function () {
+  const KEY = "art-navigator-quiz";
+  const load = () => {
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; }
+  };
+  const save = (data) => {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* private browsing */ }
+  };
+
+  // Record the result when a question has been answered
+  const card = document.querySelector("[data-quiz]");
+  if (card) {
+    const params = new URLSearchParams(location.search);
+    if (params.has("a")) {
+      const data = load();
+      data[card.dataset.quiz] = params.get("a") === card.dataset.answer;
+      save(data);
+    }
+  }
+
+  // Show marks and the running score on the index
+  const marks = document.querySelectorAll("[data-mark]");
+  if (marks.length) {
+    const data = load();
+    let right = 0, done = 0;
+    marks.forEach((el) => {
+      const result = data[el.dataset.mark];
+      if (result === undefined) return;
+      done += 1;
+      if (result) right += 1;
+      el.textContent = result ? "✓" : "✗";
+      el.style.color = result ? "var(--ok)" : "var(--bad)";
+    });
+    const box = document.getElementById("score-card");
+    if (box && done) {
+      box.hidden = false;
+      document.getElementById("score-bar").style.width = Math.round((right / done) * 100) + "%";
+      document.getElementById("score-text").textContent =
+        `${right} of ${done} answered correctly (${marks.length} questions in total).`;
+    }
+    const reset = document.getElementById("reset-progress");
+    if (reset) reset.addEventListener("click", () => { save({}); location.reload(); });
+  }
+})();

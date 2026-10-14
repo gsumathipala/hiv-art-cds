@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+<h1>Quiz</h1>
+<p class="muted">{{ total }} case-based questions with cited feedback. Your score is kept in this browser only —
+  nothing is sent anywhere.</p>
+<div class="row" style="margin-bottom:14px">
+  <div class="case-pills" style="margin:0">
+    <a href="{{ url_for('quiz.index') }}" class="{{ 'active' if not topic }}">All topics</a>
+    {% for t in topics %}<a href="{{ url_for('quiz.index', topic=t) }}">{{ t }}</a>{% endfor %}
+  </div>
+  <span class="spacer"></span>
+  <button class="btn ghost" id="reset-progress" type="button">Reset my score</button>
+</div>
+<div class="card" id="score-card" hidden>
+  <h3>Your progress</h3>
+  <div class="scorebar" style="width:100%;height:14px"><i id="score-bar" style="width:0"></i></div>
+  <p id="score-text" class="small muted" style="margin-top:6px"></p>
+</div>
+<div class="grid two" style="margin-top:14px">
+  {% for q in questions %}
+  <a class="entry" href="{{ url_for('quiz.question', qid=q.id) }}" data-question="{{ q.id }}">
+    <b>{{ loop.index }}. {{ q.topic }} <span class="quiz-mark" data-mark="{{ q.id }}"></span></b>
+    {{ q.stem|truncate(150) }}</a>
+  {% endfor %}
+</div>
+{% endblock %}
