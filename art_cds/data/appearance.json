@@ -1,0 +1,557 @@
+{
+ "atazanavir": [
+  {
+   "cap_colour": null,
+   "colour": "#c8463c",
+   "colour_word": "red",
+   "deboss": [
+    "300 mg"
+   ],
+   "kind": "hardcap",
+   "length_mm": null,
+   "shape": "hardcap",
+   "width_mm": null
+  }
+ ],
+ "biktarvy": [
+  {
+   "cap_colour": null,
+   "colour": "#6f4656",
+   "colour_word": "purplish-brown",
+   "deboss": [
+    "GSI",
+    "9883"
+   ],
+   "kind": "tablet",
+   "length_mm": 15.0,
+   "shape": "capsule",
+   "width_mm": 8.0
+  }
+ ],
+ "celsentri": [
+  {
+   "cap_colour": null,
+   "colour": "#3f74c4",
+   "colour_word": "blue",
+   "deboss": [
+    "MVC 300"
+   ],
+   "kind": "tablet",
+   "length_mm": 19.0,
+   "shape": "oval",
+   "width_mm": 10.5
+  }
+ ],
+ "combivir": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "GXFC3"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "capsule",
+   "width_mm": null
+  }
+ ],
+ "delstrigo": [
+  {
+   "cap_colour": null,
+   "colour": "#f0cf47",
+   "colour_word": "yellow",
+   "deboss": [],
+   "kind": "tablet",
+   "length_mm": 21.59,
+   "shape": "oval",
+   "width_mm": 11.3
+  }
+ ],
+ "descovy": [
+  {
+   "cap_colour": null,
+   "colour": "#3f74c4",
+   "colour_word": "blue",
+   "deboss": [
+    "GSI",
+    "225"
+   ],
+   "kind": "tablet",
+   "length_mm": 12.5,
+   "shape": "rect",
+   "width_mm": 6.4
+  }
+ ],
+ "dovato": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "SV 137"
+   ],
+   "kind": "tablet",
+   "length_mm": 18.5,
+   "shape": "oval",
+   "width_mm": 9.5
+  }
+ ],
+ "edurant": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "TMC",
+    "25"
+   ],
+   "kind": "tablet",
+   "length_mm": 6.4,
+   "shape": "round",
+   "width_mm": 6.4
+  }
+ ],
+ "efavirenz": [
+  {
+   "cap_colour": null,
+   "colour": "#f0cf47",
+   "colour_word": "yellow",
+   "deboss": [
+    "H",
+    "E8"
+   ],
+   "kind": "tablet",
+   "length_mm": 21.0,
+   "shape": "capsule",
+   "width_mm": 10.0
+  }
+ ],
+ "efv_ftc_tdf": [
+  {
+   "cap_colour": null,
+   "colour": "#ef9bb0",
+   "colour_word": "pink",
+   "deboss": [],
+   "kind": "tablet",
+   "length_mm": 22.0,
+   "shape": "capsule",
+   "width_mm": 11.0
+  }
+ ],
+ "emtriva": [
+  {
+   "cap_colour": "#a8c6ec",
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "200 mg",
+    "GILEAD"
+   ],
+   "kind": "hardcap",
+   "length_mm": 19.4,
+   "shape": "hardcap",
+   "width_mm": 6.9
+  }
+ ],
+ "epivir": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "GX CJ7"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "diamond",
+   "width_mm": null
+  },
+  {
+   "cap_colour": null,
+   "colour": "#9a9da3",
+   "colour_word": "grey",
+   "deboss": [
+    "GX EJ7"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "diamond",
+   "width_mm": null
+  }
+ ],
+ "eviplera": [
+  {
+   "cap_colour": null,
+   "colour": "#ef9bb0",
+   "colour_word": "pink",
+   "deboss": [
+    "GSI"
+   ],
+   "kind": "tablet",
+   "length_mm": 19.0,
+   "shape": "capsule",
+   "width_mm": 8.5
+  }
+ ],
+ "ftc_tdf": [
+  {
+   "cap_colour": null,
+   "colour": "#a9d6a0",
+   "colour_word": "light green",
+   "deboss": [
+    "M",
+    "ETD"
+   ],
+   "kind": "tablet",
+   "length_mm": 19.8,
+   "shape": "capsule",
+   "width_mm": 9.0
+  }
+ ],
+ "intelence": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "T200"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "capsule",
+   "width_mm": null
+  }
+ ],
+ "isentress": [
+  {
+   "cap_colour": null,
+   "colour": "#ef9bb0",
+   "colour_word": "pink",
+   "deboss": [
+    "227"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "oval",
+   "width_mm": null
+  }
+ ],
+ "isentress_600": [
+  {
+   "cap_colour": null,
+   "colour": "#f0cf47",
+   "colour_word": "yellow",
+   "deboss": [
+    "242"
+   ],
+   "kind": "tablet",
+   "length_mm": 19.1,
+   "shape": "oval",
+   "width_mm": 9.7
+  }
+ ],
+ "juluca": [
+  {
+   "cap_colour": null,
+   "colour": "#ef9bb0",
+   "colour_word": "pink",
+   "deboss": [
+    "SV J3T"
+   ],
+   "kind": "tablet",
+   "length_mm": 14.0,
+   "shape": "oval",
+   "width_mm": 7.0
+  }
+ ],
+ "kivexa": [
+  {
+   "cap_colour": null,
+   "colour": "#ee8f3c",
+   "colour_word": "orange",
+   "deboss": [
+    "GS FC2"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "capsule",
+   "width_mm": null
+  }
+ ],
+ "norvir": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "NK"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "oval",
+   "width_mm": null
+  }
+ ],
+ "odefsey": [
+  {
+   "cap_colour": null,
+   "colour": "#9a9da3",
+   "colour_word": "grey",
+   "deboss": [
+    "GSI",
+    "255"
+   ],
+   "kind": "tablet",
+   "length_mm": 15.0,
+   "shape": "capsule",
+   "width_mm": 7.0
+  }
+ ],
+ "pifeltro": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [],
+   "kind": "tablet",
+   "length_mm": 19.0,
+   "shape": "oval",
+   "width_mm": 9.5
+  }
+ ],
+ "prezista": [
+  {
+   "cap_colour": null,
+   "colour": "#c8463c",
+   "colour_word": "red",
+   "deboss": [
+    "800",
+    "T"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "oval",
+   "width_mm": null
+  }
+ ],
+ "rekambys": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [],
+   "kind": "injection",
+   "length_mm": null,
+   "shape": "vial",
+   "width_mm": null
+  }
+ ],
+ "retrovir": [
+  {
+   "cap_colour": "#3f74c4",
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [],
+   "kind": "hardcap",
+   "length_mm": null,
+   "shape": "hardcap",
+   "width_mm": null
+  }
+ ],
+ "rezolsta": [
+  {
+   "cap_colour": null,
+   "colour": "#ef9bb0",
+   "colour_word": "pink",
+   "deboss": [
+    "800",
+    "TG"
+   ],
+   "kind": "tablet",
+   "length_mm": 23.0,
+   "shape": "oval",
+   "width_mm": 11.5
+  }
+ ],
+ "rukobia": [
+  {
+   "cap_colour": null,
+   "colour": "#e3d2b0",
+   "colour_word": "beige",
+   "deboss": [
+    "SV 1V7"
+   ],
+   "kind": "tablet",
+   "length_mm": 19.0,
+   "shape": "oval",
+   "width_mm": 10.0
+  }
+ ],
+ "sunlenca_inj": [
+  {
+   "cap_colour": null,
+   "colour": "#eef3f7",
+   "colour_word": "clear",
+   "deboss": [],
+   "kind": "injection",
+   "length_mm": null,
+   "shape": "vial",
+   "width_mm": null
+  }
+ ],
+ "sunlenca_tab": [
+  {
+   "cap_colour": null,
+   "colour": "#e3d2b0",
+   "colour_word": "beige",
+   "deboss": [
+    "GSI",
+    "62L"
+   ],
+   "kind": "tablet",
+   "length_mm": 21.0,
+   "shape": "capsule",
+   "width_mm": 10.0
+  }
+ ],
+ "symtuza": [
+  {
+   "cap_colour": null,
+   "colour": "#f0cf47",
+   "colour_word": "yellow",
+   "deboss": [
+    "8121",
+    "JG"
+   ],
+   "kind": "tablet",
+   "length_mm": 22.0,
+   "shape": "capsule",
+   "width_mm": 11.0
+  }
+ ],
+ "tivicay": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "SV 572",
+    "10"
+   ],
+   "kind": "tablet",
+   "length_mm": 6.0,
+   "shape": "round",
+   "width_mm": 6.0
+  },
+  {
+   "cap_colour": null,
+   "colour": "#f3e39b",
+   "colour_word": "pale yellow",
+   "deboss": [
+    "SV 572",
+    "25"
+   ],
+   "kind": "tablet",
+   "length_mm": 7.0,
+   "shape": "round",
+   "width_mm": 7.0
+  },
+  {
+   "cap_colour": null,
+   "colour": "#f0cf47",
+   "colour_word": "yellow",
+   "deboss": [
+    "SV 572",
+    "50"
+   ],
+   "kind": "tablet",
+   "length_mm": 9.0,
+   "shape": "round",
+   "width_mm": 9.0
+  }
+ ],
+ "triumeq": [
+  {
+   "cap_colour": null,
+   "colour": "#7a4b8f",
+   "colour_word": "purple",
+   "deboss": [
+    "572 Trı"
+   ],
+   "kind": "tablet",
+   "length_mm": 22.0,
+   "shape": "oval",
+   "width_mm": 11.0
+  }
+ ],
+ "tybost": [
+  {
+   "cap_colour": null,
+   "colour": "#ee8f3c",
+   "colour_word": "orange",
+   "deboss": [
+    "GSI"
+   ],
+   "kind": "tablet",
+   "length_mm": 10.3,
+   "shape": "round",
+   "width_mm": 10.3
+  }
+ ],
+ "viread": [
+  {
+   "cap_colour": null,
+   "colour": "#a8c6ec",
+   "colour_word": "light blue",
+   "deboss": [
+    "GILEAD",
+    "4331"
+   ],
+   "kind": "tablet",
+   "length_mm": 16.8,
+   "shape": "almond",
+   "width_mm": 10.3
+  }
+ ],
+ "vocabria_inj": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [],
+   "kind": "injection",
+   "length_mm": null,
+   "shape": "vial",
+   "width_mm": null
+  }
+ ],
+ "vocabria_tab": [
+  {
+   "cap_colour": null,
+   "colour": "#f8f7f2",
+   "colour_word": "white",
+   "deboss": [
+    "SV CTV"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "oval",
+   "width_mm": null
+  }
+ ],
+ "ziagen": [
+  {
+   "cap_colour": null,
+   "colour": "#c8463c",
+   "colour_word": "red",
+   "deboss": [
+    "GX 623"
+   ],
+   "kind": "tablet",
+   "length_mm": null,
+   "shape": "capsule",
+   "width_mm": null
+  }
+ ]
+}

@@ -10,11 +10,13 @@ A licensed photograph can replace a drawing: put it at
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 from html import escape
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..knowledge import smpc
 
@@ -130,8 +132,22 @@ def parse_units(text: str) -> List[DoseUnit]:
     return units
 
 
+@lru_cache(maxsize=1)
+def _appearance_facts() -> Dict[str, List[Dict]]:
+    """Factual dose-unit attributes exported by tools/export_appearance.py (no SmPC prose)."""
+    path = Path(__file__).resolve().parent.parent / "data" / "appearance.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
 def units_for(product_key: str) -> List[DoseUnit]:
-    return parse_units(smpc.appearance_text(product_key))
+    """Dose units from the downloaded SmPC, falling back to the committed appearance facts."""
+    units = parse_units(smpc.appearance_text(product_key))
+    if units:
+        return units
+    return [DoseUnit(**fields, text="") for fields in _appearance_facts().get(product_key, [])]
 
 
 def photo_for(product_key: str) -> Optional[str]:
