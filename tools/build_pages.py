@@ -111,6 +111,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     app = create_app(Config)
     app.config["AUDIT"] = False
+    app.config["STATIC_BUILD"] = True  # the showcase has its own banner explaining what is missing
     client = app.test_client()
     written: Dict[str, int] = {}
     for url in static_pages():

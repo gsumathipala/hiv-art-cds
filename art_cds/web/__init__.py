@@ -49,7 +49,7 @@ def register(app: Flask) -> None:
             "PRODUCTS": PRODUCTS_BY_KEY,
             "TIER_LABEL": TIER_LABEL,
             "smpc_doc": smpc.load,
-            "sources_ready": _sources_ready(),
+            "sources_ready": _sources_ready() or app.config.get("STATIC_BUILD", False),
             "pill_units": pills.units_for,
             "pill_svg": pills.svg_for,
             "pill_photo": pills.photo_for,
