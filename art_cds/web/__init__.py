@@ -12,6 +12,13 @@ from ..knowledge.products import PRODUCTS_BY_KEY
 from ..visuals import pills
 
 
+def _sources_ready() -> bool:
+    """False until the SmPCs and guideline texts have been downloaded (they are not in the repository)."""
+    from ..knowledge.citations import GUIDELINE_DIR
+
+    return bool(smpc.available()) and any(GUIDELINE_DIR.glob("*.txt"))
+
+
 def register(app: Flask) -> None:
     from .api import bp as api_bp
     from .assess import bp as assess_bp
@@ -42,6 +49,7 @@ def register(app: Flask) -> None:
             "PRODUCTS": PRODUCTS_BY_KEY,
             "TIER_LABEL": TIER_LABEL,
             "smpc_doc": smpc.load,
+            "sources_ready": _sources_ready(),
             "pill_units": pills.units_for,
             "pill_svg": pills.svg_for,
             "pill_photo": pills.photo_for,

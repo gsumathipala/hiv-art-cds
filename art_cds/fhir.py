@@ -9,11 +9,10 @@ This reads data only — nothing is written back, and no identifiers are kept.
 """
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import Any, Dict, List, Optional, Tuple
 
 from .knowledge.conditions import COMORBIDITIES
-from .models import LabValue, PatientProfile
+from .models import LabValue
 
 # LOINC codes -> what the value means here
 LOINC = {

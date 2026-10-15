@@ -35,8 +35,9 @@ def hiv2(regimen, ctx):
     if any(drug_class(c) == NNRTI for c in comps):
         out.append(finding("hiv2", Severity.EXCLUDE, "NNRTIs are intrinsically inactive against HIV-2.",
                            refs=(NNRTI_HIV2, RPV_HIV1, DOR_HIV1),
-                           teaching="HIV-2 reverse transcriptase lacks the hydrophobic NNRTI-binding pocket "
-                                    "(Y181/Y188 differ), so every NNRTI is inactive."))
+                           teaching="HIV-2 reverse transcriptase differs from HIV-1 at residues lining the NNRTI "
+                                    "pocket (including 181 and 188), so NNRTIs cannot bind — intrinsic, not "
+                                    "acquired, resistance."))
     if regimen.dual and not regimen.long_acting:
         out.append(finding("hiv2", Severity.CAUTION, "No data for two-drug regimens in HIV-2 — use three active drugs.",
                            -30, refs=(EXPERT,)))

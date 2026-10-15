@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from ..knowledge.guidelines import BHIVA_ART, BHIVA_HEPATITIS, BHIVA_MONITORING, BHIVA_PREGNANCY, BHIVA_TB
+from ..knowledge.guidelines import BHIVA_ART, BHIVA_HEPATITIS, BHIVA_MONITORING, BHIVA_PREGNANCY
 from ..models import Alert, LabResult, PatientProfile, Pregnancy, RegimenAssessment, TreatmentStatus, guideline
 from ..knowledge.citations import bhiva
 from .resistance import ResistanceReport

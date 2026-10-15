@@ -1,7 +1,10 @@
-"""HIV antiretroviral therapy decision support and teaching tool (UK).
+"""ART Navigator UK — HIV antiretroviral decision support and teaching tool.
+
+Created by Saranga Sumathipala.
 
 Regimen tiers follow BHIVA guidance; every product fact comes from the UK
-Summary of Product Characteristics on emc.
+Summary of Product Characteristics on emc. Every such statement is verified
+against its source text — see tools/verify_smpc.py.
 """
 from __future__ import annotations
 
@@ -11,7 +14,8 @@ from flask import Flask
 
 from .config import Config
 
-__version__ = "1.0.0"
+__author__ = "Saranga Sumathipala"
+__version__ = "2.0.0"
 
 
 def create_app(config: Optional[type] = None) -> Flask:

@@ -34,6 +34,12 @@
   </header>
   <main>
     <div class="wrap">
+      {% if not sources_ready %}
+      <div class="banner"><b>Source texts not downloaded yet.</b> The UK SmPCs and BHIVA guideline text are not
+        distributed with this repository. Run <code>python -m tools.fetch_guidelines</code> and
+        <code>python -m tools.fetch_smpc</code> (about 15 minutes) to fill in product details, adverse-effect charts
+        and tablet pictures. The decision engine already works without them.</div>
+      {% endif %}
       {% if mode != 'clinical' %}
       <div class="banner edu"><b>Education mode — not a medical device.</b> For teaching and for exploring the
         evidence; not for making decisions about individual patients. <a href="{{ url_for('learn.governance') }}">Why?</a></div>
@@ -47,7 +53,8 @@
   </main>
   <footer>
     <div class="wrap">
-      ART Navigator v{{ app_version }} · knowledge base {{ kb_version }} · {{ mode }} mode ·
+      <b>ART Navigator</b> — created by Saranga Sumathipala · v{{ app_version }} · knowledge base {{ kb_version }} ·
+      {{ mode }} mode ·
       <a href="{{ url_for('learn.governance') }}">clinical safety</a> · Product information is reproduced from UK Summaries of Product Characteristics
       on the <a href="https://www.medicines.org.uk/emc" target="_blank" rel="noopener">electronic medicines compendium (emc)</a>;
       each page states the SmPC version used. Regimen tiers follow the BHIVA adult ART guidelines (2025 interim update) and BHIVA pregnancy guidelines (2025).

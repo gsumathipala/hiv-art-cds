@@ -1,0 +1,68 @@
+MIT License
+
+Copyright (c) 2026 Saranga Sumathipala
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+EXCEPTIONS AND THIRD-PARTY COMPONENTS
+================================================================================
+
+1. QRISK3-2017 — art_cds/calculators/qrisk3_raw.py
+
+   This file is a translation of the QRISK3-2017 C source, copyright 2017
+   ClinRisk Ltd., and is licensed under the GNU Lesser General Public License,
+   version 3 or later — NOT under the MIT licence above. See
+   https://www.gnu.org/licenses/lgpl-3.0.html and https://qrisk.org.
+
+   ClinRisk's additional terms require that the disclaimer reproduced in that
+   file accompanies any risk score the code generates. The application displays
+   it alongside every QRISK3 result. ClinRisk stress that it is the end user's
+   responsibility to check that this implementation produces the same results as
+   the original code at https://qrisk.org; it is validated against the 97
+   reference scores in tests/data/qrisk3_reference.json.
+
+2. Summaries of Product Characteristics (SmPCs)
+
+   SmPC text is the copyright of the respective marketing authorisation holders
+   and is published on the electronic medicines compendium (emc,
+   https://www.medicines.org.uk/emc). No SmPC text is distributed with this
+   repository: `python -m tools.fetch_smpc` downloads it into
+   art_cds/data/smpc/, which is excluded from version control. Review emc's
+   terms before redistributing any copy you create.
+
+3. BHIVA guidelines
+
+   Guideline text is the copyright of the British HIV Association
+   (https://bhiva.org). No guideline text is distributed with this repository:
+   `python -m tools.fetch_guidelines` downloads it into
+   art_cds/data/guidelines/, which is excluded from version control. It is used
+   only to verify that statements in the knowledge base match their source.
+   Short quotations appear in the source code as verification patterns and as
+   citations.
+
+4. Stanford HIV Drug Resistance Database (HIVdb)
+
+   The optional resistance-scoring integration calls the public HIVdb web
+   service at https://hivdb.stanford.edu. It is off by default and is subject to
+   Stanford's own terms of use.
+
+Nothing in this licence grants permission to use the clinical content for the
+treatment of patients: see docs/clinical-safety/README.md for the intended use
+and regulatory position.
