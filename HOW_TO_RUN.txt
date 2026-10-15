@@ -1,0 +1,142 @@
+ART NAVIGATOR UK — HOW TO RUN
+Created by Saranga Sumathipala
+================================================================================
+
+
+1. RUN IT (this computer, already set up)
+--------------------------------------------------------------------------------
+
+    cd ~/hiv-art-cds
+    .venv/bin/python run.py
+
+Then open:   http://127.0.0.1:5000
+
+Stop it with Ctrl-C in that terminal.
+
+IMPORTANT: use 127.0.0.1, NOT localhost.
+macOS AirPlay Receiver also listens on port 5000 and answers to the name
+"localhost", so http://localhost:5000 gives a 403 error. If you would rather
+use localhost, turn AirPlay Receiver off in:
+    System Settings -> General -> AirDrop & Handoff
+or run the app on another port:
+    .venv/bin/python -c "from art_cds import create_app; create_app().run(port=5050, debug=True)"
+
+
+2. WHERE TO START IN THE APP
+--------------------------------------------------------------------------------
+
+  Assess a patient   The decision engine. Click one of the teaching cases at the
+                     top of the form to see it work immediately.
+  UK formulary       Every UK antiretroviral tablet, drawn to scale from its
+                     SmPC section 3 description.
+  Learn              Life-cycle diagram, drug monographs, resistance explorer,
+                     concentration-time curves.
+  Calculators        CrCl, eGFR (3 equations), Child-Pugh, QRISK3, FRAX link.
+  Long-acting        CAB+RPV and lenacapavir schedules, missed injections,
+                     oral bridging, calendar download.
+  Perinatal          Infant post-natal prophylaxis and intrapartum planning.
+  Quiz               12 case-based questions with cited feedback.
+  Sources            Every SmPC and guideline the app relies on.
+
+
+3. SET UP ON A NEW COMPUTER
+--------------------------------------------------------------------------------
+
+The UK SmPCs and BHIVA guideline texts are NOT stored in the repository (they
+are copyright the manufacturers and BHIVA). You download your own copies.
+
+    git clone https://github.com/gsumathipala/hiv-art-cds.git
+    cd hiv-art-cds
+    python3 -m venv .venv
+    .venv/bin/pip install -r requirements.txt
+
+    .venv/bin/python -m tools.fetch_guidelines    # BHIVA PDFs, about 1 minute
+    .venv/bin/python -m tools.fetch_smpc          # 37 SmPCs, about 15 minutes
+    .venv/bin/python -m tools.verify_smpc         # expect 345/345 claims verified
+
+    .venv/bin/python run.py
+
+The SmPC download is slow because emc rate-limits requests (one every 20
+seconds). If emc shows its "are you human" check, the tool waits and retries,
+then stops - just run it again later.
+
+The app works without these downloads: the decision engine lives in code. You
+lose product pages, adverse-effect charts and SmPC citations until they arrive.
+
+
+4. RUN IT IN A BROWSER WITH NO INSTALL
+--------------------------------------------------------------------------------
+
+GitHub Codespaces runs the whole thing in your browser:
+    https://github.com/gsumathipala/hiv-art-cds
+    -> Code -> Codespaces -> Create codespace on main
+
+It installs everything, downloads the guidelines, starts the app and forwards
+the port automatically. The SmPC download continues in the background; watch it
+with:  tail -f /tmp/fetch_smpc.log
+
+
+5. OTHER USEFUL COMMANDS
+--------------------------------------------------------------------------------
+
+    .venv/bin/python -m pytest -q              Run the tests (305 tests)
+    .venv/bin/python -m tools.verify_smpc      Check all 345 citations
+    .venv/bin/python -m tools.check_updates    Re-fetch SmPCs and diff them
+    .venv/bin/python -m tools.check_updates --quick    Re-verify, no network
+    .venv/bin/python -m tools.build_pages      Rebuild the static showcase
+    .venv/bin/python -m tools.export_appearance  Refresh the tablet-drawing facts
+
+
+6. SETTINGS (environment variables)
+--------------------------------------------------------------------------------
+
+  ART_CDS_MODE           education (default) | clinical
+                         Clinical mode removes the education banner. Only use it
+                         once a DCB0129/DCB0160 safety case is approved - see
+                         docs/clinical-safety/README.md
+  ART_CDS_SECRET_KEY     Flask secret key (set a real one if ever deployed)
+  ART_CDS_AUDIT          1 (default) | 0 - write an audit line per recommendation
+  ART_CDS_AUDIT_INPUTS   0 (default) | 1 - also store the inputs (clinical data)
+  ART_CDS_AUDIT_DIR      Where audit lines go (default: instance/audit/)
+
+Example:
+    ART_CDS_AUDIT=0 .venv/bin/python run.py
+
+
+7. LINKS
+--------------------------------------------------------------------------------
+
+  Repository       https://github.com/gsumathipala/hiv-art-cds
+  Showcase site    https://gsumathipala.github.io/hiv-art-cds/
+                   (teaching pages only - the engine needs the running app)
+  Local app        http://127.0.0.1:5000
+
+
+8. TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+  403 error in the browser
+      You used localhost instead of 127.0.0.1. See section 1.
+
+  "Address already in use"
+      The app is already running. Find and stop it:
+          lsof -nP -iTCP:5000 -sTCP:LISTEN
+          kill <PID>
+
+  Banner says "Source texts not downloaded yet"
+      Run the two fetch commands in section 3.
+
+  Tablet pictures missing, product pages empty
+      Same cause - the SmPCs have not been downloaded.
+
+  A fetch fails with "no emc result matching..."
+      emc has renamed that product. Find it at medicines.org.uk/emc and pin its
+      id in art_cds/knowledge/products.py as emc_id=<number from the URL>.
+
+
+--------------------------------------------------------------------------------
+NOTE ON USE
+This tool runs in education mode and is not a medical device. It supports, and
+does not replace, clinical judgement, the current SmPC, BHIVA guidance, the
+Liverpool HIV interaction checker and your HIV MDT.
+--------------------------------------------------------------------------------
