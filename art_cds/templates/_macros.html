@@ -18,7 +18,7 @@
     {%- set units = pill_units(key) -%}
     {%- if units -%}
       {%- for u in (units[-1:] if compact else units) -%}{{ pill_svg(u, key ~ loop.index ~ faces, 1 if compact else faces)|safe }}{%- endfor -%}
-    {%- else -%}<span class="small muted">{{ 'SmPC not downloaded' if not smpc_doc(key) else 'No appearance description' }}</span>{%- endif -%}
+    {%- else -%}<span class="small muted">No appearance description</span>{%- endif -%}
   {%- endif -%}
 {%- endmacro %}
 
