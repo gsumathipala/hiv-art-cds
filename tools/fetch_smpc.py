@@ -272,7 +272,11 @@ def resolve_id(product: Product, delay: float) -> int:
         name = html.unescape(" ".join(re.sub(r"<[^>]+>", "", m.group(2)).split()))
         if name and name.lower().startswith(product.query.lower()) and product.match.lower() in name.lower():
             return int(m.group(1))
-    raise LookupError(f"{product.key}: no emc result matching {product.match!r}")
+    raise LookupError(
+        f"{product.key}: no emc result starting with {product.query!r} and containing {product.match!r}. "
+        "emc renames products (Descovy is listed as 'Emtricitabine/Tenofovir Alafenamide Gilead'), so pin the "
+        "product's emc id with emc_id=... in art_cds/knowledge/products.py — search for it at "
+        "https://www.medicines.org.uk/emc and take the number from the /emc/product/<id>/smpc URL.")
 
 
 def fetch(product: Product, delay: float, refresh: bool) -> Path:
